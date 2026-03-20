@@ -1,16 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   
   // 禁用 SSR，使用 SPA 模式
   ssr: false,
   
   modules: ['@nuxt/ui'],
   
+  // 引入自定义 CSS
+  css: ['~/assets/css/main.css'],
+  
   // Nuxt UI 配置
   ui: {
     global: true,
-    icons: ['lucide', 'heroicons'],
   },
   
   // 应用配置
@@ -29,8 +31,6 @@ export default defineNuxtConfig({
   colorMode: {
     preference: 'system',
     fallback: 'light',
-    storage: 'localStorage',
-    storageKey: 'openclaw-color-mode',
   },
   
   // 兼容性问题
