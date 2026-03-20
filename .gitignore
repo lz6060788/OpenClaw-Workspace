@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Nuxt
+.nuxt/
+.output/
+.nitro/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
