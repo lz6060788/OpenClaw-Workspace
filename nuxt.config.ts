@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   // 禁用 SSR，使用 SPA 模式
   ssr: false,
   
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@unocss/nuxt'],
   
   // 引入自定义 CSS
   css: ['~/assets/css/main.css'],
@@ -15,6 +15,14 @@ export default defineNuxtConfig({
   ui: {
     global: true,
     fonts: false,
+  },
+  
+  // UnoCSS 配置
+  uno: {
+    shortcuts: {
+      'btn': 'px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer',
+      'btn-primary': 'btn bg-green-500 text-white hover:bg-green-600',
+    },
   },
   
   // 应用配置
