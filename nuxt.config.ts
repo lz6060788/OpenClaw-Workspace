@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   
@@ -13,6 +14,7 @@ export default defineNuxtConfig({
   // Nuxt UI 配置
   ui: {
     global: true,
+    fonts: false,
   },
   
   // 应用配置
