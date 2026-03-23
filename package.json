@@ -1,7 +1,7 @@
 {
   "name": "openclaw-workspace",
   "version": "1.0.0",
-  "description": "OpenClaw Workspace Dashboard",
+  "description": "OpenClaw 个人开发后台",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,16 +12,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@guolao/vue-monaco-editor": "^1.6.0",
+    "@headlessui/vue": "^1.7.23",
     "@nuxt/ui": "^3.3.7",
-    "@prisma/client": "^5.22.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@unocss/preset-icons": "^66.6.7",
+    "[ant-design]": "link:@iconify-json/[ant-design]",
+    "[lucide]": "link:@iconify-json/[lucide]",
     "nuxt": "^3.21.2",
-    "prisma": "^5.22.0"
+    "pinia": "^3.0.4"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
     "@unocss/nuxt": "^66.6.7",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.2",
     "unocss": "^66.6.7"
   }
 }
