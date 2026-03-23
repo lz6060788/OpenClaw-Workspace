@@ -16,5 +16,9 @@
     "@prisma/client": "^5.22.0",
     "nuxt": "^3.21.2",
     "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "@unocss/nuxt": "^66.6.7",
+    "unocss": "^66.6.7"
   }
 }

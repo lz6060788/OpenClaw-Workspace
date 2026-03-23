@@ -1,3 +1,15 @@
 /* assets/css/main.css */
-@import "tailwindcss";
+/* Nuxt UI v3 样式 - 确保在 Tailwind 之前导入 */
 @import "@nuxt/ui";
+
+/* Tailwind CSS 基础样式 */
+@import "tailwindcss";
+
+/* 自定义全局样式 */
+html {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  @apply antialiased;
+}
