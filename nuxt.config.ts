@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   // Nuxt UI 配置
   ui: {
     global: true,
+    fonts: false,
   },
   
   // 应用配置
