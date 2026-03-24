@@ -3,7 +3,7 @@
   <div class="file-area">
     <!-- 无项目时的空状态 -->
     <div v-if="!projectStore.currentProject" class="empty-state">
-      <AppIcon name="folder-open" size="xl" class="empty-icon" />
+      <UIcon name="lucide:folder-open" size="xl" class="empty-icon" />
       <h4>未选择项目</h4>
       <p>请先在左侧选择一个 GitHub 项目</p>
     </div>
@@ -13,12 +13,12 @@
       <!-- 文件树 -->
       <div class="file-tree-panel">
         <div class="panel-header">
-          <AppIcon name="folder" size="sm" />
+          <UIcon name="lucide:folder" size="sm" />
           <span class="panel-title">文件树</span>
         </div>
         <div class="panel-content">
           <div v-if="fileTree.length === 0" class="loading-state">
-            <AppIcon name="loader-2" size="md" class="spin" />
+            <UIcon name="lucide:loader-2" size="md" class="spin" />
             <span>加载中...</span>
           </div>
           <div v-else class="file-tree">
@@ -42,7 +42,6 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import AppIcon from '~/components/base/AppIcon.vue'
 import TreeNode from '~/components/dev/TreeNode.vue'
 import CodeEditor from '~/components/dev/CodeEditor.vue'
 
@@ -53,7 +52,9 @@ const loadFiles = async () => {
   if (!projectStore.currentProject) return
 
   try {
-    const data = await $fetch(`/api/projects/${projectStore.currentProject.name}/files`) as any[]
+    const data = await $fetch('/api/projects/files', {
+      query: { project: projectStore.currentProject.full_name }
+    }) as any[]
     if (data) {
       fileTree.value = data
     }
@@ -66,7 +67,9 @@ const selectFile = async (file: any) => {
   projectStore.setCurrentFile(file.path)
 
   try {
-    const content = await $fetch(`/api/projects/${projectStore.currentProject.name}/file?path=${encodeURIComponent(file.path)}`) as string
+    const content = await $fetch('/api/projects/file', {
+      query: { project: projectStore.currentProject.full_name, path: file.path }
+    }) as string
     if (content !== null) {
       projectStore.setFileContent(content)
     }
