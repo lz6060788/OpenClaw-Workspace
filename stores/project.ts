@@ -2,8 +2,15 @@
 import { defineStore } from 'pinia'
 
 export interface Project {
+  id: number
   name: string
-  path: string
+  full_name: string
+  owner: string
+  description: string | null
+  default_branch: string
+  branches: string[]
+  private: boolean
+  localExists: boolean
 }
 
 export const useProjectStore = defineStore('project', {

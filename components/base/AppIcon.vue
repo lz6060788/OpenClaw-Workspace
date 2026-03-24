@@ -1,9 +1,11 @@
 <!-- components/base/AppIcon.vue -->
 <template>
-  <span class="app-icon" :class="sizeClass">
-    <span v-if="!isLoaded" class="icon-placeholder"></span>
-    <i v-else :class="iconClass" @click="handleClick"></i>
-  </span>
+  <UIcon 
+    :name="iconName" 
+    :size="sizeMap[props.size]"
+    :color="props.color"
+    @click="handleClick"
+  />
 </template>
 
 <script setup lang="ts">
@@ -27,40 +29,22 @@ const emit = defineEmits<{
 }>()
 
 const sizeMap = {
-  xs: 'w-3 h-3 text-xs',
-  sm: 'w-4 h-4 text-sm',
-  md: 'w-5 h-5 text-base',
-  lg: 'w-6 h-6 text-lg',
-  xl: 'w-7 h-7 text-xl'
+  xs: 'xs',
+  sm: 'sm', 
+  md: 'md',
+  lg: 'lg',
+  xl: 'xl'
 }
 
-const sizeClass = computed(() => sizeMap[props.size])
-
-// 使用 UnoCSS 图标预设
-const iconClass = computed(() => {
-  const baseIcon = props.name.startsWith('i-') ? props.name : `i-lucide-${props.name}`
-  return props.color ? `${baseIcon} text-${props.color}` : baseIcon
+// 转换为 Nuxt UI 图标名称格式
+const iconName = computed(() => {
+  const name = props.name
+    .replace(/^i-/, '')
+    .replace(/^lucide-/, '')
+  return `lucide:${name}`
 })
-
-const isLoaded = ref(true)
 
 const handleClick = () => {
   emit('click')
 }
 </script>
-
-<style scoped>
-.app-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-placeholder {
-  width: 1em;
-  height: 1em;
-  background: currentColor;
-  border-radius: 50%;
-  opacity: 0.2;
-}
-</style>
