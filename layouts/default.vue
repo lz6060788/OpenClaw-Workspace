@@ -49,10 +49,10 @@ const route = useRoute()
 
 const sidebarComponent = computed(() => {
   if (route.path.startsWith('/dev')) {
-    return resolveComponent('DevSidebar')
+    return resolveComponent('LayoutDevSidebar')
   }
   if (route.path.startsWith('/docs')) {
-    return resolveComponent('DocsSidebar')
+    return resolveComponent('LayoutDocsSidebar')
   }
   return null
 })

@@ -24,7 +24,19 @@ export default defineNuxtConfig({
 
   // UnoCSS 配置 - 设计系统
   uno: {
-    presets: [],
+    presets: [
+      [
+        'unocss:preset-icons',
+        {
+          scale: 1.2,
+          cdn: 'https://esm.sh/',
+          extraProperties: {
+            'display': 'inline-block',
+            'vertical-align': 'middle',
+          },
+        },
+      ],
+    ],
     shortcuts: {
       // 布局
       'flex-center': 'flex items-center justify-center',
