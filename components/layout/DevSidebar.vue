@@ -3,7 +3,7 @@
   <aside class="dev-sidebar">
     <div class="sidebar-header">
       <div class="header-content">
-        <UIcon name="lucide:folder-git-2" class="header-icon" />
+        <AppIcon name="lucide:folder-git-2" class="header-icon" />
         <div>
           <h2 class="sidebar-title">GitHub 项目</h2>
           <p class="sidebar-subtitle">{{ projects.length }} 个仓库</p>
@@ -16,7 +16,7 @@
           title="刷新"
           @click="refreshProjects"
         >
-          <UIcon name="lucide:refresh-cw" />
+          <AppIcon name="lucide:refresh-cw" />
         </button>
       </div>
     </div>
@@ -48,19 +48,19 @@
           :title="project.localExists ? '更新项目' : '克隆到本地'"
           @click.stop="cloneProject(project)"
         >
-          <UIcon v-if="cloning === project.full_name" name="lucide:loader-2" class="spin" />
-          <UIcon v-else :name="project.localExists ? 'lucide:download' : 'lucide:plus'" />
+          <AppIcon v-if="cloning === project.full_name" name="lucide:loader-2" class="spin" />
+          <AppIcon v-else :name="project.localExists ? 'lucide:download' : 'lucide:plus'" />
         </button>
       </div>
 
       <div v-if="projects.length === 0 && !loading" class="empty-state">
-        <UIcon name="lucide:folder-open" class="empty-icon" />
+        <AppIcon name="lucide:folder-open" class="empty-icon" />
         <p class="empty-text">暂无仓库</p>
         <p class="empty-hint">在 GitHub 创建仓库后会自动显示</p>
       </div>
 
       <div v-if="loading && projects.length === 0" class="loading-state">
-        <UIcon name="lucide:loader-2" class="spin" />
+        <AppIcon name="lucide:loader-2" class="spin" />
         <p>加载中...</p>
       </div>
     </div>

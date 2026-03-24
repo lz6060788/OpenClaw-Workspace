@@ -3,7 +3,7 @@
   <div class="file-area">
     <!-- 无项目时的空状态 -->
     <div v-if="!projectStore.currentProject" class="empty-state">
-      <UIcon name="lucide:folder-open" size="xl" class="empty-icon" />
+      <AppIcon name="lucide:folder-open" size="xl" class="empty-icon" />
       <h4>未选择项目</h4>
       <p>请先在左侧选择一个 GitHub 项目</p>
     </div>
@@ -13,12 +13,12 @@
       <!-- 文件树 -->
       <div class="file-tree-panel">
         <div class="panel-header">
-          <UIcon name="lucide:folder" size="sm" />
+          <AppIcon name="lucide:folder" size="sm" />
           <span class="panel-title">文件树</span>
         </div>
         <div class="panel-content">
           <div v-if="fileTree.length === 0" class="loading-state">
-            <UIcon name="lucide:loader-2" size="md" class="spin" />
+            <AppIcon name="lucide:loader-2" size="md" class="spin" />
             <span>加载中...</span>
           </div>
           <div v-else class="file-tree">

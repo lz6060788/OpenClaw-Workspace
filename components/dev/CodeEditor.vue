@@ -3,7 +3,7 @@
   <div class="code-editor">
     <div class="editor-header">
       <div class="file-info">
-        <UIcon name="lucide:file-code" size="sm" class="text-blue-400" />
+        <AppIcon name="lucide:file-code" size="sm" class="text-blue-400" />
         <span class="file-name">
           {{ projectStore.currentFile || '未选择文件' }}
         </span>
@@ -20,7 +20,7 @@
     </div>
     <div class="editor-body">
       <div v-if="!projectStore.currentFile" class="empty-state">
-        <UIcon name="lucide:file-search" size="xl" class="empty-icon" />
+        <AppIcon name="lucide:file-search" size="xl" class="empty-icon" />
         <p>选择文件查看内容</p>
       </div>
       <div v-else ref="editorContainer" class="monaco-container"></div>
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import { UIcon as AppIcon } from '~/components/base/AppIcon.vue'
+import AppIcon from '~/components/base/AppIcon.vue'
 import AppButton from '~/components/base/AppButton.vue'
 
 const projectStore = useProjectStore()
