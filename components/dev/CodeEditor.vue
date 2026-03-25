@@ -68,6 +68,7 @@ const editorContainer = ref<HTMLElement>()
 const editMode = ref(false)
 const loadingEditor = ref(false)
 const editorInstance = ref<any>(null)
+let contentChangeDisposable: { dispose: () => void } | null = null
 const savedVersionId = ref<number | null>(null)
 const contentChanged = ref(false)
 
@@ -108,8 +109,6 @@ const toggleEditMode = async () => {
 
     if (!editorContainer.value) return
 
-    editorContainer.value.innerHTML = ''
-
     editorInstance.value = monaco.editor.create(editorContainer.value, {
       value: projectStore.fileContent || '',
       language: language.value,
@@ -135,7 +134,7 @@ const toggleEditMode = async () => {
     savedVersionId.value = model?.getAlternativeVersionId() ?? null
     contentChanged.value = false
 
-    editorInstance.value.onDidChangeModelContent(() => {
+    contentChangeDisposable = editorInstance.value.onDidChangeModelContent(() => {
       const currentModel = editorInstance.value?.getModel()
       if (!currentModel || savedVersionId.value === null) return
       contentChanged.value = currentModel.getAlternativeVersionId() !== savedVersionId.value
@@ -150,6 +149,9 @@ const toggleEditMode = async () => {
 }
 
 const exitEditMode = () => {
+  contentChangeDisposable?.dispose()
+  contentChangeDisposable = null
+
   if (editorInstance.value) {
     try {
       editorInstance.value.dispose()
