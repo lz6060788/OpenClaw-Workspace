@@ -59,7 +59,27 @@
 
     <!-- 主区域 -->
     <main class="flex-1 overflow-hidden bg-zinc-900 flex flex-col min-w-0">
-      <div class="w-full h-full flex flex-col min-w-0">
+      <!-- 顶部导航栏 -->
+      <header class="h-14 px-4 md:px-5 border-b border-white/5 bg-zinc-900/90 backdrop-blur-xl flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="md:hidden text-lg">🦞</span>
+          <div class="min-w-0">
+            <p class="text-xs text-zinc-500 leading-tight">OpenClaw Workspace</p>
+            <h1 class="text-sm md:text-base text-zinc-100 font-semibold truncate">{{ pageTitle }}</h1>
+          </div>
+        </div>
+
+        <button
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 transition-colors"
+          :title="`切换主题（当前：${themeLabel}）`"
+          @click="toggleTheme"
+        >
+          <AppIcon :name="colorMode.value === 'dark' ? 'moon' : 'sun'" size="xs" :icon-color="colorMode.value === 'dark' ? 'rgb(251 191 36)' : 'rgb(253 224 71)'" />
+          <span class="text-xs font-medium">{{ themeLabel }}</span>
+        </button>
+      </header>
+
+      <div class="w-full flex-1 overflow-hidden flex flex-col min-w-0">
         <KeepAlive>
           <NuxtPage />
         </KeepAlive>
@@ -148,8 +168,23 @@ import DevSidebar from '~/components/layout/DevSidebar.vue'
 import DocsSidebar from '~/components/layout/DocsSidebar.vue'
 
 const route = useRoute()
+const colorMode = useColorMode()
 const sidebarCollapsed = ref(false)
 const mobileDrawerOpen = ref(false)
+
+const pageTitle = computed(() => {
+  if (route.path.startsWith('/docs')) return '文档中心'
+  if (route.path.startsWith('/dev')) return '开发工作台'
+  return '工作区'
+})
+
+const themeLabel = computed(() => {
+  return colorMode.value === 'dark' ? '深色' : '浅色'
+})
+
+const toggleTheme = () => {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
 
 watch(() => route.path, () => {
   mobileDrawerOpen.value = false
