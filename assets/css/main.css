@@ -40,6 +40,46 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* ===== UI 优化 - 工业级暗黑与琥珀橙色板 ===== */
+  /* 主背景色 - 暖调极深炭灰 */
+  --bg-primary: #18181B;
+  --bg-secondary: #27272A;
+  --bg-tertiary: #3f3f46;
+  
+  /* 主题点缀色 - 琥珀橙 */
+  --color-primary: #f59e0b;
+  --color-primary-hover: #d97706;
+  --color-secondary: #78716c;
+  --color-accent: #f59e0b;
+  
+  /* 文字颜色 - 暖灰色 */
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --text-muted: #52525b;
+  
+  /* 边框颜色 */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  
+  /* 成功/警告/错误 */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* 聊天区域最大宽度 */
+  --chat-max-width: 900px;
+  
+  /* 一级侧边栏宽度 */
+  --sidebar-primary-width: 3.5rem;
+  
+  /* 二级侧边栏宽度 */
+  --sidebar-secondary-width: 14rem;
+  
+  /* 统一圆角 - 硬朗小圆角 */
+  --radius-unified: 6px;
 }
 
 * {
@@ -55,4 +95,30 @@ html {
 body {
   background-color: #0f172a;
   color: #f1f5f9;
+}
+
+/* ===== 自定义滚动条 - 仅在 hover 时显示 ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 容器 hover 时显示滚动条 */
+.scrollbar-hover:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
 }

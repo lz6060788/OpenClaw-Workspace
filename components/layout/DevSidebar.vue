@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="sidebar-content">
+    <div class="sidebar-content scrollbar-hover">
       <div
         v-for="project in projects"
         :key="project.id"
@@ -29,6 +29,8 @@
         :class="{ active: currentProject?.full_name === project.full_name }"
         @click="selectProject(project)"
       >
+        <!-- 选中指示条 -->
+        <div class="indicator-bar" v-if="currentProject?.full_name === project.full_name" />
         <div class="project-status">
           <span 
             class="status-dot" 
@@ -151,12 +153,12 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--bg-secondary);
 }
 
 .sidebar-header {
-  padding: var(--spacing-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -170,21 +172,21 @@ onMounted(() => {
 }
 
 .header-icon {
-  width: 20px;
-  height: 20px;
-  color: #60a5fa;
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
 }
 
 .sidebar-title {
   font-size: var(--text-sm);
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--text-primary);
   line-height: 1.3;
 }
 
 .sidebar-subtitle {
   font-size: var(--text-xs);
-  color: rgba(241, 245, 249, 0.5);
+  color: var(--text-secondary);
   line-height: 1.3;
 }
 
@@ -194,18 +196,18 @@ onMounted(() => {
 }
 
 .icon-btn {
-  padding: var(--spacing-1);
-  border-radius: var(--radius-md);
+  padding: 4px;
+  border-radius: var(--radius-unified);
   cursor: pointer;
   transition: all 0.15s ease-out;
   background: transparent;
   border: none;
-  color: rgba(241, 245, 249, 0.5);
+  color: var(--text-secondary);
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
 }
 
 .icon-btn.spinning {
@@ -230,11 +232,12 @@ onMounted(() => {
 .project-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3);
-  border-radius: var(--radius-lg);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-unified);
   cursor: pointer;
   transition: all 0.15s ease-out;
+  position: relative;
 }
 
 .project-item:hover {
@@ -242,7 +245,19 @@ onMounted(() => {
 }
 
 .project-item.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* 选中指示条 */
+.indicator-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
 }
 
 .project-status {
@@ -254,12 +269,12 @@ onMounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(239, 68, 68, 0.8);
+  background: var(--color-error);
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .status-dot.exists {
-  background: rgba(34, 197, 94, 0.8);
+  background: var(--color-success);
   border-color: rgba(34, 197, 94, 0.3);
 }
 
@@ -269,12 +284,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-right: var(--spacing-2);
 }
 
 .project-name {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: #f1f5f9;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -282,30 +298,30 @@ onMounted(() => {
 
 .project-branch {
   font-size: var(--text-xs);
-  color: rgba(241, 245, 249, 0.4);
+  color: var(--text-tertiary);
 }
 
 .action-btn {
   flex-shrink: 0;
-  padding: var(--spacing-1);
-  border-radius: var(--radius-md);
+  padding: 4px;
+  border-radius: var(--radius-unified);
   cursor: pointer;
   transition: all 0.15s ease-out;
   background: transparent;
   border: none;
-  color: rgba(241, 245, 249, 0.4);
+  color: var(--text-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .action-btn:hover {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-primary);
 }
 
 .action-btn.loading {
-  color: #60a5fa;
+  color: var(--color-primary);
 }
 
 .empty-state,
@@ -316,7 +332,7 @@ onMounted(() => {
   gap: var(--spacing-3);
   padding: var(--spacing-8) var(--spacing-4);
   text-align: center;
-  color: rgba(241, 245, 249, 0.5);
+  color: var(--text-secondary);
 }
 
 .empty-icon {

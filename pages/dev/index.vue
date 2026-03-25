@@ -59,6 +59,7 @@ const tabs = [
   height: 100%;
   overflow: hidden;
   position: relative;
+  background: var(--bg-primary);
 }
 
 .dev-main {
@@ -71,6 +72,8 @@ const tabs = [
 .dev-chat {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 工具面板 */
@@ -80,16 +83,17 @@ const tabs = [
   top: 0;
   bottom: 0;
   width: 0;
-  background: rgba(15, 23, 42, 0.95);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease-out;
   overflow: hidden;
+  z-index: 20;
 }
 
 .dev-panels.panels-open {
-  width: 400px;
+  width: 350px;
 }
 
 .panel-tabs {
@@ -97,8 +101,8 @@ const tabs = [
   align-items: center;
   gap: var(--spacing-1);
   padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.5);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
 }
 
 .panel-tabs button {
@@ -106,23 +110,23 @@ const tabs = [
   align-items: center;
   gap: var(--spacing-1);
   padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-unified);
   background: transparent;
   border: none;
-  color: rgba(241, 245, 249, 0.6);
+  color: var(--text-secondary);
   font-size: var(--text-sm);
   cursor: pointer;
   transition: all 0.15s ease-out;
 }
 
 .panel-tabs button:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
 }
 
 .panel-tabs button.active {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-primary);
 }
 
 .tab-label {
@@ -138,29 +142,29 @@ const tabs = [
   overflow: hidden;
 }
 
-/* 浮动工具栏 */
+/* 浮动工具栏 - 琥珀橙色 */
 .floating-toolbar {
   position: absolute;
   right: var(--spacing-4);
   bottom: var(--spacing-4);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-unified);
+  background: var(--color-primary);
   border: none;
-  color: white;
+  color: #000;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
   transition: all 0.2s ease-out;
   z-index: 10;
 }
 
 .floating-toolbar:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
 }
 
 /* 移动端适配 */

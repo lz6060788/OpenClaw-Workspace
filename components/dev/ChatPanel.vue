@@ -1,21 +1,57 @@
 <!-- components/dev/ChatPanel.vue -->
 <template>
   <div class="chat-panel">
+    <!-- 顶部标题栏 - 压缩高度 + 面包屑 + 操作按钮 -->
     <div class="panel-header">
       <div class="header-left">
-        <AppIcon name="message-square" size="md" />
-        <div>
-          <h3 class="panel-title">对话</h3>
-          <p class="panel-subtitle">与 OpenClaw AI 对话</p>
+        <AppIcon name="message-square" size="sm" class="header-icon" />
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">GitHub 项目</span>
+          <AppIcon name="chevron-right" size="xs" class="breadcrumb-sep" />
+          <span class="breadcrumb-item active">{{ currentProjectName || '对话' }}</span>
         </div>
       </div>
       <div class="header-right">
-        <AppButton variant="ghost" size="sm" icon="more-vertical" />
+        <button class="header-action-btn" title="新建对话">
+          <AppIcon name="plus" size="sm" />
+        </button>
+        <button class="header-action-btn" title="历史记录">
+          <AppIcon name="history" size="sm" />
+        </button>
+        <button class="header-action-btn" title="清空对话">
+          <AppIcon name="trash-2" size="sm" />
+        </button>
       </div>
     </div>
 
-    <div class="panel-messages" ref="messagesContainer">
-      <TransitionGroup name="message" tag="div" class="messages-list">
+    <!-- 消息区域 -->
+    <div class="panel-messages scrollbar-hover" ref="messagesContainer">
+      <!-- 欢迎空状态卡片 -->
+      <div v-if="messages.length === 0" class="welcome-card">
+        <div class="welcome-icon">🦞</div>
+        <h2 class="welcome-title">你好！我是你的开发助手</h2>
+        <p class="welcome-desc">选择一个 GitHub 项目开始开发</p>
+        <div class="welcome-features">
+          <div class="feature-item">
+            <AppIcon name="file-plus" size="sm" />
+            <span>创建新文件</span>
+          </div>
+          <div class="feature-item">
+            <AppIcon name="edit-3" size="sm" />
+            <span>修改代码</span>
+          </div>
+          <div class="feature-item">
+            <AppIcon name="zap" size="sm" />
+            <span>添加功能</span>
+          </div>
+          <div class="feature-item">
+            <AppIcon name="bug" size="sm" />
+            <span>修复 Bug</span>
+          </div>
+        </div>
+      </div>
+
+      <TransitionGroup v-else name="message" tag="div" class="messages-list">
         <div
           v-for="(msg, index) in messages"
           :key="index"
@@ -30,20 +66,23 @@
       </TransitionGroup>
     </div>
 
+    <!-- 底部输入区域 - 统一操作台 -->
     <div class="panel-input">
-      <div class="input-wrapper">
-        <AppInput
-          v-model="input"
-          placeholder="输入指令给 OpenClaw..."
-          :disabled="isLoading"
-          @keyup.enter="sendMessage"
-        />
-        <AppButton
-          icon="send"
-          :loading="isLoading"
-          :disabled="!input.trim()"
-          @click="sendMessage"
-        />
+      <div class="input-container">
+        <div class="input-wrapper">
+          <AppInput
+            v-model="input"
+            placeholder="输入指令给 OpenClaw..."
+            :disabled="isLoading"
+            @keyup.enter="sendMessage"
+          />
+          <AppButton
+            icon="send"
+            :loading="isLoading"
+            :disabled="!input.trim()"
+            @click="sendMessage"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -53,6 +92,10 @@
 import AppIcon from '~/components/base/AppIcon.vue'
 import AppButton from '~/components/base/AppButton.vue'
 import AppInput from '~/components/base/AppInput.vue'
+import { useProjectStore } from '~/stores/project'
+
+const projectStore = useProjectStore()
+const currentProjectName = computed(() => projectStore.currentProject?.name || '')
 
 const messages = ref([
   {
@@ -117,16 +160,18 @@ watch(() => messages.value.length, () => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--bg-primary);
 }
 
+/* 顶部标题栏 - 压缩高度 + 视觉底边 */
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-4) var(--spacing-5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.5);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  min-height: 48px;
 }
 
 .header-left {
@@ -135,20 +180,65 @@ watch(() => messages.value.length, () => {
   gap: var(--spacing-3);
 }
 
-.panel-title {
-  font-size: var(--text-base);
-  font-weight: 600;
+.header-icon {
+  color: var(--color-primary);
 }
 
-.panel-subtitle {
-  font-size: var(--text-xs);
-  color: rgba(241, 245, 249, 0.5);
+/* 面包屑导航 */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
 }
 
+.breadcrumb-item {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.breadcrumb-item.active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.breadcrumb-sep {
+  color: var(--text-tertiary);
+}
+
+/* 右侧操作按钮 */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.header-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-unified);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease-out;
+}
+
+.header-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+/* 消息区域 */
 .panel-messages {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
 }
 
 .messages-list {
@@ -157,6 +247,67 @@ watch(() => messages.value.length, () => {
   gap: var(--spacing-4);
 }
 
+/* 欢迎空状态卡片 */
+.welcome-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-8);
+}
+
+.welcome-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-xl);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-4);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.welcome-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.welcome-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+}
+
+.welcome-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  justify-content: center;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-unified);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.feature-item :deep(svg) {
+  color: var(--color-primary);
+}
+
+/* 消息气泡 */
 .message {
   display: flex;
   flex-direction: column;
@@ -173,20 +324,20 @@ watch(() => messages.value.length, () => {
 }
 
 .message-content {
-  padding: var(--spacing-4);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-unified);
+  border: 1px solid var(--border-subtle);
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border-bottom-right-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #000;
+  border-color: var(--color-primary);
 }
 
 .message.assistant .message-content {
-  background: rgba(30, 41, 59, 0.8);
-  color: #f1f5f9;
-  border-bottom-left-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .message-text {
@@ -197,20 +348,44 @@ watch(() => messages.value.length, () => {
 
 .message-time {
   font-size: var(--text-xs);
-  opacity: 0.6;
+  color: var(--text-tertiary);
   margin-top: var(--spacing-1);
   display: block;
 }
 
+/* 底部输入区域 - 统一操作台 */
 .panel-input {
-  padding: var(--spacing-4);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.5);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+}
+
+.input-container {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  padding: var(--spacing-2);
+  transition: border-color 0.2s ease-out;
+}
+
+.input-container:focus-within {
+  border-color: var(--color-primary);
 }
 
 .input-wrapper {
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.input-wrapper :deep(input) {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+}
+
+.input-wrapper :deep(input)::placeholder {
+  color: var(--text-tertiary);
 }
 
 /* 消息动画 */
