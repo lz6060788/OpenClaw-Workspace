@@ -39,13 +39,11 @@
 
     <!-- 编辑器主体 -->
     <div class="flex-1 overflow-hidden relative">
-      <!-- 未选择文件 -->
       <div v-if="!projectStore.currentFile" class="flex flex-col items-center justify-center h-full text-zinc-500">
         <AppIcon name="file-search" size="xl" icon-color="rgb(82 82 83)" />
         <p class="text-sm mt-3">选择文件查看内容</p>
       </div>
 
-      <!-- 只读模式 -->
       <div v-else-if="!editMode" class="h-full overflow-auto p-4">
         <pre
           v-if="projectStore.fileContent"
@@ -54,7 +52,6 @@
         <div v-else class="text-zinc-500">加载中...</div>
       </div>
 
-      <!-- 编辑模式 - Monaco Editor -->
       <div v-show="editMode" ref="editorContainer" class="h-full"></div>
     </div>
   </div>
@@ -66,17 +63,15 @@ import AppIcon from '~/components/base/AppIcon.vue'
 import AppButton from '~/components/base/AppButton.vue'
 
 const projectStore = useProjectStore()
+const colorMode = useColorMode()
 const editorContainer = ref<HTMLElement>()
 const editMode = ref(false)
 const loadingEditor = ref(false)
 const editorInstance = ref<any>(null)
-const editorContent = ref('')
-const isUpdatingFromEditor = ref(false)
-const updateTimer = ref<any>(null)
+const savedVersionId = ref<number | null>(null)
+const contentChanged = ref(false)
 
-const hasChanges = computed(() => {
-  return editorContent.value !== projectStore.fileContent
-})
+const hasChanges = computed(() => contentChanged.value)
 
 const language = computed(() => {
   if (!projectStore.currentFile) return 'plaintext'
@@ -96,10 +91,11 @@ const language = computed(() => {
   return map[ext || ''] || 'plaintext'
 })
 
+const monacoTheme = computed(() => colorMode.value === 'dark' ? 'vs-dark' : 'vs')
+
 const toggleEditMode = async () => {
   if (editMode.value || loadingEditor.value) return
 
-  // 检查文件大小
   if (projectStore.fileContent && projectStore.fileContent.length > 500 * 1024) {
     alert('文件过大（超过500KB），建议使用其他编辑器')
     return
@@ -108,27 +104,16 @@ const toggleEditMode = async () => {
   loadingEditor.value = true
 
   try {
-    // 动态导入 Monaco
     const monaco = await import('monaco-editor')
 
     if (!editorContainer.value) return
 
-    // 清空容器
     editorContainer.value.innerHTML = ''
 
-    // 配置禁用所有 worker
-    ;(self as any).MonacoEnvironment = {
-      getWorker: function (_: any, label: string) {
-        // 返回空的 worker，禁用所有语言服务
-        return new Worker(URL.createObjectURL(new Blob([''], { type: 'text/javascript' })))
-      }
-    }
-
-    // 创建编辑器
     editorInstance.value = monaco.editor.create(editorContainer.value, {
       value: projectStore.fileContent || '',
       language: language.value,
-      theme: 'vs-dark',
+      theme: monacoTheme.value,
       fontSize: 14,
       lineHeight: 22,
       fontFamily: "'JetBrains Mono', 'Consolas', monospace",
@@ -138,44 +123,25 @@ const toggleEditMode = async () => {
       tabSize: 2,
       wordWrap: 'off',
       lineNumbers: 'on',
-      // 完全禁用智能提示
       quickSuggestions: false,
       suggestOnTriggerCharacters: false,
       acceptSuggestionOnEnter: 'off',
       tabCompletion: 'off',
+      semanticHighlighting: { enabled: false },
+      largeFileOptimizations: true,
     })
 
-    // 防抖监听内容变化 - 避免频繁更新导致卡死
+    const model = editorInstance.value.getModel()
+    savedVersionId.value = model?.getAlternativeVersionId() ?? null
+    contentChanged.value = false
+
     editorInstance.value.onDidChangeModelContent(() => {
-      if (!editorInstance.value || isUpdatingFromEditor.value) return
-
-      // 清除之前的定时器
-      if (updateTimer.value) {
-        clearTimeout(updateTimer.value)
-      }
-
-      // 防抖更新，100ms 后执行
-      updateTimer.value = setTimeout(() => {
-        const newContent = editorInstance.value.getValue()
-
-        // 只有内容真正变化时才更新
-        if (newContent !== editorContent.value) {
-          isUpdatingFromEditor.value = true
-          editorContent.value = newContent
-          console.log('CodeEditor: content updated, length:', newContent.length)
-
-          // 下一个事件循环重置标志
-          nextTick(() => {
-            isUpdatingFromEditor.value = false
-          })
-        }
-      }, 100)
+      const currentModel = editorInstance.value?.getModel()
+      if (!currentModel || savedVersionId.value === null) return
+      contentChanged.value = currentModel.getAlternativeVersionId() !== savedVersionId.value
     })
 
-    editorContent.value = projectStore.fileContent || ''
     editMode.value = true
-
-    console.log('CodeEditor: edit mode enabled')
   } catch (error) {
     console.error('CodeEditor: failed to enable edit mode', error)
   } finally {
@@ -184,12 +150,6 @@ const toggleEditMode = async () => {
 }
 
 const exitEditMode = () => {
-  // 清理定时器
-  if (updateTimer.value) {
-    clearTimeout(updateTimer.value)
-    updateTimer.value = null
-  }
-
   if (editorInstance.value) {
     try {
       editorInstance.value.dispose()
@@ -200,12 +160,14 @@ const exitEditMode = () => {
   }
 
   editMode.value = false
-  editorContent.value = ''
-  isUpdatingFromEditor.value = false
+  savedVersionId.value = null
+  contentChanged.value = false
 }
 
 const saveFile = async () => {
-  if (!projectStore.currentProject || !projectStore.currentFile) return
+  if (!projectStore.currentProject || !projectStore.currentFile || !editorInstance.value) return
+
+  const nextContent = editorInstance.value.getValue()
 
   try {
     await $fetch('/api/projects/save', {
@@ -213,24 +175,30 @@ const saveFile = async () => {
       body: {
         project: projectStore.currentProject.full_name,
         path: projectStore.currentFile,
-        content: editorContent.value
+        content: nextContent
       }
     })
-    projectStore.setFileContent(editorContent.value)
+    projectStore.setFileContent(nextContent)
+    const model = editorInstance.value.getModel()
+    savedVersionId.value = model?.getAlternativeVersionId() ?? null
+    contentChanged.value = false
   } catch (e) {
     console.error('Failed to save file:', e)
   }
 }
 
-// 切换文件时退出编辑模式
+watch(() => colorMode.value, async () => {
+  if (!editorInstance.value) return
+  const monaco = await import('monaco-editor')
+  monaco.editor.setTheme(monacoTheme.value)
+})
+
 watch(() => projectStore.currentFile, (newFile, oldFile) => {
   if (newFile !== oldFile) {
-    console.log('CodeEditor: file changed from', oldFile, 'to', newFile)
     exitEditMode()
   }
 })
 
-// 组件卸载时清理
 onUnmounted(() => {
   exitEditMode()
 })
