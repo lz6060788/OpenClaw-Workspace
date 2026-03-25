@@ -21,3 +21,7 @@ npm-debug.log*
 .worktrees/
 worktrees/
 github-projects/
+
+# Project-specific
+.CLAUDE.md
+.cache/
