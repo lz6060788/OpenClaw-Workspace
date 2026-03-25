@@ -70,9 +70,8 @@ const colorMode = useColorMode()
 const editorContainer = ref<HTMLElement>()
 const editMode = ref(false)
 const loadingEditor = ref(false)
-const editorInstance = ref<any>(null)
+const editorInstance = shallowRef<any>(null)
 const editorContent = ref('')
-const updateTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 
 const hasChanges = computed(() => {
   return editorContent.value !== projectStore.fileContent
@@ -114,9 +113,13 @@ const toggleEditMode = async () => {
   try {
     const monaco = await import('monaco-editor')
 
-    if (!editorContainer.value) return
+    editMode.value = true
+    await nextTick()
 
-    editorContainer.value.innerHTML = ''
+    if (!editorContainer.value) {
+      editMode.value = false
+      return
+    }
 
     editorInstance.value = monaco.editor.create(editorContainer.value, {
       value: projectStore.fileContent || '',
@@ -141,29 +144,19 @@ const toggleEditMode = async () => {
 
     editorInstance.value.onDidChangeModelContent(() => {
       if (!editorInstance.value) return
-
-      if (updateTimer.value) clearTimeout(updateTimer.value)
-
-      updateTimer.value = setTimeout(() => {
-        editorContent.value = editorInstance.value?.getValue() || ''
-      }, 120)
+      editorContent.value = editorInstance.value.getValue()
     })
 
     editorContent.value = projectStore.fileContent || ''
-    editMode.value = true
   } catch (error) {
     console.error('CodeEditor: failed to enable edit mode', error)
+    editMode.value = false
   } finally {
     loadingEditor.value = false
   }
 }
 
 const exitEditMode = () => {
-  if (updateTimer.value) {
-    clearTimeout(updateTimer.value)
-    updateTimer.value = null
-  }
-
   if (editorInstance.value) {
     try {
       editorInstance.value.dispose()
