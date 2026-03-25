@@ -29,6 +29,9 @@ importers:
       '[lucide]':
         specifier: link:@iconify-json/[lucide]
         version: link:@iconify-json/[lucide]
+      monaco-editor-vue3:
+        specifier: ^1.0.5
+        version: 1.0.5(monaco-editor@0.55.1)(vue@3.5.30(typescript@5.9.3))
       nuxt:
         specifier: ^3.21.2
         version: 3.21.2(@parcel/watcher@2.5.6)(@types/node@25.5.0)(@vue/compiler-sfc@3.5.30)(cac@6.7.14)(db0@0.3.4)(ioredis@5.10.1)(lightningcss@1.32.0)(magicast@0.5.2)(rollup-plugin-visualizer@7.0.1(rollup@4.60.0))(rollup@4.60.0)(terser@5.46.1)(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.1)(yaml@2.8.3))(yaml@2.8.3)
@@ -3274,6 +3277,12 @@ packages:
 
   mocked-exports@0.1.1:
     resolution: {integrity: sha512-aF7yRQr/Q0O2/4pIXm6PZ5G+jAd7QS4Yu8m+WEeEHGnbo+7mE36CbLSDQiXYV8bVL3NfmdeqPJct0tUlnjVSnA==}
+
+  monaco-editor-vue3@1.0.5:
+    resolution: {integrity: sha512-1n4ayGcuYpZcQ6A4PUYZYqXuf6n+A/2pUNdLnb8I39WZV0zkhfvSRNau3hB0qzq6vp6wSNZ7MgcjQRCJCiGHWQ==}
+    peerDependencies:
+      monaco-editor: '>= 0.25.0 < 1'
+      vue: ^3
 
   monaco-editor@0.55.1:
     resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
@@ -7828,6 +7837,11 @@ snapshots:
       ufo: 1.6.3
 
   mocked-exports@0.1.1: {}
+
+  monaco-editor-vue3@1.0.5(monaco-editor@0.55.1)(vue@3.5.30(typescript@5.9.3)):
+    dependencies:
+      monaco-editor: 0.55.1
+      vue: 3.5.30(typescript@5.9.3)
 
   monaco-editor@0.55.1:
     dependencies:

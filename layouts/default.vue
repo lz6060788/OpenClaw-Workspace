@@ -1,207 +1,161 @@
 <!-- layouts/default.vue -->
 <template>
-  <div class="app-layout">
-    <!-- 一级侧边栏 - 精简版 -->
-    <aside class="primary-sidebar" :class="{ collapsed: sidebarCollapsed }">
-      <div class="primary-sidebar-logo">
-        <div class="logo-icon">🦞</div>
+  <div class="flex h-screen overflow-hidden bg-zinc-900 text-zinc-50">
+    <!-- 桌面端一级侧边栏 -->
+    <aside
+      class="hidden md:flex flex-col items-center p-3 bg-zinc-800/50 border-r border-white/5 w-16 transition-all duration-300 relative z-10 backdrop-blur-sm"
+      :class="{ 'w-12': sidebarCollapsed }"
+    >
+      <div class="mb-4">
+        <div class="w-10 h-10 flex-center bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+          <span class="text-lg">🦞</span>
+        </div>
       </div>
-      <nav class="primary-sidebar-nav">
+
+      <nav class="flex-1 flex flex-col gap-2">
         <NuxtLink
           to="/dev"
-          class="nav-item"
-          :class="{ active: route.path.startsWith('/dev') }"
+          class="group flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all duration-200"
+          :class="route.path.startsWith('/dev')
+            ? 'bg-amber-500/10 text-amber-400'
+            : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'"
         >
-          <AppIcon name="code-2" size="lg" />
-          <span class="nav-label">开发</span>
+          <AppIcon name="code-2" size="sm" :icon-color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''" />
+          <span class="text-[10px] font-medium">开发</span>
         </NuxtLink>
         <NuxtLink
           to="/docs"
-          class="nav-item"
-          :class="{ active: route.path.startsWith('/docs') }"
+          class="group flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all duration-200"
+          :class="route.path.startsWith('/docs')
+            ? 'bg-amber-500/10 text-amber-400'
+            : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'"
         >
-          <AppIcon name="file-text" size="lg" />
-          <span class="nav-label">文档</span>
+          <AppIcon name="file-text" size="sm" :icon-color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''" />
+          <span class="text-[10px] font-medium">文档</span>
         </NuxtLink>
       </nav>
-      <!-- 侧边栏折叠按钮 -->
-      <button class="collapse-btn" @click="toggleSidebar" :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'">
-        <AppIcon :name="sidebarCollapsed ? 'chevron-right' : 'chevron-left'" size="sm" />
-      </button>
+
+      <AppIcon
+        :name="sidebarCollapsed ? 'chevron-right' : 'chevron-left'"
+        size="sm"
+        variant="subtle"
+        background="filled"
+        clickable
+        :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'"
+        @click="sidebarCollapsed = !sidebarCollapsed"
+      />
     </aside>
 
-    <!-- 二级侧边栏 - 可折叠 -->
-    <aside class="secondary-sidebar" :class="{ collapsed: sidebarCollapsed }">
-      <KeepAlive>
-        <component :is="sidebarComponent" />
-      </KeepAlive>
+    <!-- 桌面端二级侧边栏 -->
+    <aside
+      class="hidden md:flex flex-col bg-zinc-800/30 border-r border-white/5 overflow-hidden transition-all duration-300 backdrop-blur-sm"
+      :class="{ 'w-0': sidebarCollapsed, 'w-64': !sidebarCollapsed }"
+    >
+      <!-- Dev 侧边栏 -->
+      <DevSidebar v-if="route.path.startsWith('/dev')" />
+      <!-- Docs 侧边栏 -->
+      <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
     </aside>
 
     <!-- 主区域 -->
-    <main class="main-area">
-      <div class="main-content-wrapper">
+    <main class="flex-1 overflow-hidden bg-zinc-900 flex flex-col min-w-0">
+      <div class="w-full h-full flex flex-col min-w-0">
         <KeepAlive>
           <NuxtPage />
         </KeepAlive>
       </div>
     </main>
+
+    <!-- 移动端底部导航 -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-[calc(56px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] bg-zinc-800/90 border-t border-white/5 z-40 flex items-center justify-around px-safe-left px-safe-right backdrop-blur-lg">
+      <NuxtLink
+        to="/dev"
+        class="flex-1 flex flex-col items-center gap-1 p-2 text-zinc-500 active:text-amber-400 transition-colors"
+        :class="{ 'text-amber-400': route.path.startsWith('/dev') }"
+        @click="mobileDrawerOpen = false"
+      >
+        <AppIcon name="code-2" size="sm" :icon-color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''" />
+        <span class="text-[10px] font-medium">开发</span>
+      </NuxtLink>
+
+      <button
+        class="flex-1 flex flex-col items-center gap-1 p-2 text-zinc-500 active:text-amber-400 transition-all active:scale-95"
+        :class="{ 'text-zinc-200 bg-white/5': mobileDrawerOpen }"
+        @click="mobileDrawerOpen = !mobileDrawerOpen"
+      >
+        <AppIcon :name="mobileDrawerOpen ? 'x' : 'menu'" size="sm" />
+        <span class="text-[10px] font-medium">{{ mobileDrawerOpen ? '关闭' : '菜单' }}</span>
+      </button>
+
+      <NuxtLink
+        to="/docs"
+        class="flex-1 flex flex-col items-center gap-1 p-2 text-zinc-500 active:text-amber-400 transition-colors"
+        :class="{ 'text-amber-400': route.path.startsWith('/docs') }"
+        @click="mobileDrawerOpen = false"
+      >
+        <AppIcon name="file-text" size="sm" :icon-color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''" />
+        <span class="text-[10px] font-medium">文档</span>
+      </NuxtLink>
+    </nav>
+
+    <!-- 移动端抽屉遮罩 -->
+    <Teleport to="body">
+      <div
+        v-if="mobileDrawerOpen"
+        class="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300"
+        :class="{ 'opacity-100': mobileDrawerOpen, 'opacity-0 pointer-events-none': !mobileDrawerOpen }"
+        @click="mobileDrawerOpen = false"
+      />
+
+      <!-- 移动端抽屉侧边栏 -->
+      <aside
+        class="md:hidden fixed top-0 left-0 bottom-[calc(56px+env(safe-area-inset-bottom))] w-80 max-w-[90vw] bg-zinc-800/95 backdrop-blur-xl z-[51] overflow-hidden flex flex-col pt-safe-top transition-transform duration-300 ease-out"
+        :class="{ 'translate-x-0': mobileDrawerOpen, '-translate-x-full': !mobileDrawerOpen }"
+      >
+        <div class="sticky top-0 z-10 p-4 border-b border-white/5 bg-zinc-800/80 backdrop-blur-xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 flex-center bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl shadow-lg">
+              <span class="text-lg">🦞</span>
+            </div>
+            <div>
+              <h2 class="text-base font-semibold text-zinc-100 leading-tight">OpenClaw</h2>
+              <p class="text-xs text-zinc-500 leading-tight">Workspace</p>
+            </div>
+          </div>
+          <AppIcon
+            name="x"
+            size="sm"
+            variant="subtle"
+            clickable
+            @click="mobileDrawerOpen = false"
+          />
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-3">
+          <!-- Dev 侧边栏 -->
+          <DevSidebar v-if="route.path.startsWith('/dev')" />
+          <!-- Docs 侧边栏 -->
+          <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
+        </div>
+      </aside>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
 import AppIcon from '~/components/base/AppIcon.vue'
+import DevSidebar from '~/components/layout/DevSidebar.vue'
+import DocsSidebar from '~/components/layout/DocsSidebar.vue'
 
 const route = useRoute()
 const sidebarCollapsed = ref(false)
+const mobileDrawerOpen = ref(false)
 
-const toggleSidebar = () => {
-  sidebarCollapsed.value = !sidebarCollapsed.value
-}
-
-const sidebarComponent = computed(() => {
-  if (route.path.startsWith('/dev')) {
-    return resolveComponent('LayoutDevSidebar')
-  }
-  if (route.path.startsWith('/docs')) {
-    return resolveComponent('LayoutDocsSidebar')
-  }
-  return null
+watch(() => route.path, () => {
+  mobileDrawerOpen.value = false
 })
+
+if (process.client) {
+  sidebarCollapsed.value = false
+}
 </script>
-
-<style scoped>
-.app-layout {
-  display: flex;
-  height: 100vh;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-/* 一级侧边栏 - 与二级侧边栏同色，仅用细线分隔 */
-.primary-sidebar {
-  width: var(--sidebar-primary-width);
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-2);
-  transition: width 0.3s ease-out;
-  position: relative;
-  z-index: 10;
-}
-
-.primary-sidebar.collapsed {
-  width: 2.5rem;
-}
-
-.primary-sidebar-logo {
-  margin-bottom: var(--spacing-3);
-}
-
-.logo-icon {
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary);
-  border-radius: var(--radius-unified);
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-  transition: transform 0.2s ease-out;
-}
-
-.logo-icon:hover {
-  transform: scale(1.05);
-}
-
-.primary-sidebar-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--spacing-2);
-  border-radius: var(--radius-unified);
-  transition: all 0.2s ease-out;
-  color: var(--text-secondary);
-  text-decoration: none;
-}
-
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-}
-
-.nav-item.active {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--color-primary);
-}
-
-.nav-label {
-  font-size: 0.6rem;
-  font-weight: 500;
-}
-
-/* 折叠按钮 */
-.collapse-btn {
-  position: absolute;
-  bottom: var(--spacing-2);
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-unified);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease-out;
-}
-
-.collapse-btn:hover {
-  background: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-/* 二级侧边栏 - 可折叠 */
-.secondary-sidebar {
-  width: var(--sidebar-secondary-width);
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-subtle);
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: width 0.3s ease-out, transform 0.3s ease-out;
-}
-
-.secondary-sidebar.collapsed {
-  width: 0;
-  transform: translateX(-100%);
-}
-
-/* 主区域 - 占据全部宽度 */
-.main-area {
-  flex: 1;
-  overflow: hidden;
-  background: var(--bg-primary);
-  display: flex;
-}
-
-/* 主内容包裹器 - 全宽显示 */
-.main-content-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-</style>

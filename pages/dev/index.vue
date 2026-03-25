@@ -1,44 +1,69 @@
 <!-- pages/dev/index.vue -->
 <template>
-  <div class="dev-page">
-    <!-- 主内容区 -->
-    <div class="dev-main">
-      <!-- AI对话主区域 -->
-      <ChatPanel class="dev-chat" />
+  <div class="flex h-full overflow-hidden relative bg-zinc-900">
+    <!-- AI对话主区域 -->
+    <ChatPanel class="flex-1 min-w-0 flex flex-col" />
 
-      <!-- 可展开的工具面板 -->
-      <div class="dev-panels" :class="{ 'panels-open': panelsOpen }">
-        <div class="panel-tabs">
+    <!-- 可展开的工具面板 -->
+    <div
+      class="absolute top-0 right-0 bottom-0 bg-zinc-800/95 backdrop-blur-xl border-l border-white/5 flex flex-col overflow-hidden transition-all duration-300 ease-out z-20"
+      :class="{ 'w-0': !panelsOpen, 'w-full md:w-[720px]': panelsOpen }"
+    >
+      <!-- 面板头部 - Tabs样式 -->
+      <div v-show="panelsOpen" class="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/50">
+        <!-- Tab按钮 -->
+        <div class="flex items-center gap-1">
           <button
             v-for="tab in tabs"
             :key="tab.key"
-            :class="{ active: activeTab === tab.key }"
+            class="relative px-4 py-2 text-sm font-medium transition-all duration-200 after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:transition-all after:duration-200"
+            :class="activeTab === tab.key
+              ? 'text-amber-400 after:bg-amber-400'
+              : 'text-zinc-500 hover:text-zinc-400 after:bg-transparent'"
             @click="activeTab = tab.key"
           >
-            <AppIcon :name="tab.icon" size="xs" />
-            <span class="tab-label">{{ tab.label }}</span>
-          </button>
-          <button class="panel-close" @click="panelsOpen = false">
-            <AppIcon name="x" size="xs" />
+            <span class="hidden md:inline">{{ tab.label }}</span>
+            <AppIcon :name="tab.icon" size="xs" class="md:hidden" :icon-color="activeTab === tab.key ? 'rgb(251 191 36)' : ''" />
           </button>
         </div>
-
-        <div class="panel-content">
-          <FileArea v-if="activeTab === 'files'" />
-          <PreviewPanel v-else-if="activeTab === 'preview'" />
-        </div>
+        <AppIcon
+          name="x"
+          size="sm"
+          variant="subtle"
+          clickable
+          class="ml-auto"
+          @click="panelsOpen = false"
+        />
       </div>
 
-      <!-- 浮动工具栏（打开面板） -->
-      <button v-if="!panelsOpen" class="floating-toolbar" @click="panelsOpen = true">
-        <AppIcon name="layers" size="sm" />
-      </button>
+      <div class="flex-1 overflow-hidden">
+        <FileArea v-if="activeTab === 'files'" class="h-full" />
+        <PreviewPanel v-else-if="activeTab === 'preview'" class="h-full" />
+      </div>
     </div>
+
+    <!-- 浮动工具按钮 -->
+    <Transition name="fab-slide">
+      <AppIcon
+        v-if="!panelsOpen"
+        name="layers"
+        size="lg"
+        variant="primary"
+        background="filled"
+        clickable
+        class="absolute z-10 shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
+        :class="[
+          'top-1/2 -translate-y-1/2',
+          'right-4'
+        ]"
+        title="打开工具面板"
+        @click="panelsOpen = true"
+      />
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import ChatPanel from '~/components/dev/ChatPanel.vue'
 import PreviewPanel from '~/components/dev/PreviewPanel.vue'
 import FileArea from '~/components/dev/FileArea.vue'
@@ -54,124 +79,14 @@ const tabs = [
 </script>
 
 <style scoped>
-.dev-page {
-  display: flex;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-  background: var(--bg-primary);
+.fab-slide-enter-active,
+.fab-slide-leave-active {
+  transition: all 0.3s ease-out;
 }
 
-.dev-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  position: relative;
-}
-
-.dev-chat {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 工具面板 */
-.dev-panels {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease-out;
-  overflow: hidden;
-  z-index: 20;
-}
-
-.dev-panels.panels-open {
-  width: 350px;
-}
-
-.panel-tabs {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-tertiary);
-}
-
-.panel-tabs button {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-unified);
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-}
-
-.panel-tabs button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-}
-
-.panel-tabs button.active {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--color-primary);
-}
-
-.tab-label {
-  display: none;
-}
-
-.panel-close {
-  margin-left: auto;
-}
-
-.panel-content {
-  flex: 1;
-  overflow: hidden;
-}
-
-/* 浮动工具栏 - 琥珀橙色 */
-.floating-toolbar {
-  position: absolute;
-  right: var(--spacing-4);
-  bottom: var(--spacing-4);
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-unified);
-  background: var(--color-primary);
-  border: none;
-  color: #000;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-  transition: all 0.2s ease-out;
-  z-index: 10;
-}
-
-.floating-toolbar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .dev-panels.panels-open {
-    width: 100%;
-    left: 0;
-  }
+.fab-slide-enter-from,
+.fab-slide-leave-to {
+  opacity: 0;
+  transform: translateX(20px) scale(0.8);
 }
 </style>

@@ -1,16 +1,17 @@
 <!-- components/base/AppButton.vue -->
 <template>
   <button
+    class="app-button inline-flex items-center justify-center gap-2 border-none cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
     :class="buttonClasses"
     :disabled="disabled || loading"
     @click="handleClick"
   >
-    <AppIcon v-if="loading" name="loader-2" size="sm" class="animate-spin" />
-    <AppIcon v-else-if="icon && iconPosition === 'left'" :name="icon" :size="iconSize" />
-    <span v-if="$slots.default" :class="{ 'opacity-0': loading }">
+    <AppIcon v-if="loading" name="loader-2" :size="iconSize" :icon-color="loadingColor" />
+    <AppIcon v-else-if="icon && iconPosition === 'left'" :name="icon" :size="iconSize" :variant="iconVariant" :background="iconBackground" :icon-color="iconColor" />
+    <span v-if="$slots.default" class="whitespace-nowrap">
       <slot />
     </span>
-    <AppIcon v-else-if="icon && iconPosition === 'right'" :name="icon" :size="iconSize" />
+    <AppIcon v-else-if="icon && iconPosition === 'right'" :name="icon" :size="iconSize" :variant="iconVariant" :background="iconBackground" :icon-color="iconColor" />
   </button>
 </template>
 
@@ -33,7 +34,8 @@ const props = defineProps({
   },
   disabled: Boolean,
   loading: Boolean,
-  fullWidth: Boolean
+  fullWidth: Boolean,
+  iconColor: String
 })
 
 const emit = defineEmits<{
@@ -63,6 +65,21 @@ const iconSize = computed(() => {
   return sizeMap[props.size] || 'sm'
 })
 
+const iconVariant = computed(() => {
+  if (props.variant === 'primary') return 'ghost'
+  if (props.variant === 'danger') return 'danger'
+  return 'subtle'
+})
+
+const iconBackground = computed(() => {
+  return 'none'
+})
+
+const loadingColor = computed(() => {
+  if (props.variant === 'primary') return '#ffffff'
+  return 'rgb(251 191 36)'
+})
+
 const handleClick = () => {
   if (!props.disabled && !props.loading) {
     emit('click')
@@ -72,19 +89,12 @@ const handleClick = () => {
 
 <style scoped>
 .app-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  border-radius: var(--radius-lg);
   font-weight: 500;
+  border-radius: var(--radius-lg);
 }
 
 .app-button:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #f59e0b;
   outline-offset: 2px;
 }
 
@@ -92,52 +102,57 @@ const handleClick = () => {
 .app-button-xs {
   padding: 0.375rem 0.75rem;
   font-size: var(--text-xs);
+  height: 2rem;
 }
 
 .app-button-sm {
   padding: 0.5rem 1rem;
   font-size: var(--text-sm);
+  height: 2.25rem;
 }
 
 .app-button-md {
   padding: 0.625rem 1.25rem;
   font-size: var(--text-sm);
+  height: 2.5rem;
 }
 
 .app-button-lg {
   padding: 0.75rem 1.5rem;
   font-size: var(--text-base);
+  height: 2.75rem;
 }
 
 /* 变体 */
 .app-button-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #000;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .app-button-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .app-button-secondary {
-  background: #334155;
-  color: white;
+  background: rgba(39, 39, 42, 0.5);
+  color: #d4d4d8;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .app-button-secondary:hover:not(:disabled) {
-  background: #475569;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .app-button-ghost {
   background: transparent;
-  color: #f1f5f9;
+  color: #a1a1aa;
 }
 
 .app-button-ghost:hover:not(:disabled) {
-  background: rgba(241, 245, 249, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d4d4d8;
 }
 
 .app-button-danger {

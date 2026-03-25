@@ -1,29 +1,61 @@
 <!-- components/dev/CodeEditor.vue -->
 <template>
-  <div class="code-editor">
-    <div class="editor-header">
-      <div class="file-info">
-        <AppIcon name="lucide:file-code" size="sm" class="text-blue-400" />
-        <span class="file-name">
+  <div class="flex flex-col h-full bg-zinc-900/50">
+    <!-- 编辑器头部 -->
+    <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/50">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <AppIcon name="file-code" size="sm" icon-color="rgb(96 165 250)" />
+        <span class="text-sm font-medium text-zinc-100 truncate">
           {{ projectStore.currentFile || '未选择文件' }}
         </span>
+        <span v-if="!editMode" class="text-xs text-zinc-500">(只读)</span>
       </div>
-      <AppButton
-        v-if="projectStore.currentFile && hasChanges"
-        variant="primary"
-        size="sm"
-        icon="save"
-        @click="saveFile"
-      >
-        保存
-      </AppButton>
+      <div class="flex items-center gap-2">
+        <button
+          v-if="projectStore.currentFile && !editMode"
+          @click="toggleEditMode"
+          class="text-xs text-amber-400 hover:text-amber-300 transition-colors px-2 py-1 rounded hover:bg-amber-500/10"
+        >
+          {{ loadingEditor ? '加载中...' : '编辑模式' }}
+        </button>
+        <AppButton
+          v-if="editMode && hasChanges"
+          variant="primary"
+          size="sm"
+          icon="save"
+          @click="saveFile"
+        >
+          保存
+        </AppButton>
+        <button
+          v-if="editMode"
+          @click="exitEditMode"
+          class="text-xs text-zinc-400 hover:text-zinc-300 transition-colors px-2 py-1 rounded hover:bg-white/5"
+        >
+          退出编辑
+        </button>
+      </div>
     </div>
-    <div class="editor-body">
-      <div v-if="!projectStore.currentFile" class="empty-state">
-        <AppIcon name="lucide:file-search" size="xl" class="empty-icon" />
-        <p>选择文件查看内容</p>
+
+    <!-- 编辑器主体 -->
+    <div class="flex-1 overflow-hidden relative">
+      <!-- 未选择文件 -->
+      <div v-if="!projectStore.currentFile" class="flex flex-col items-center justify-center h-full text-zinc-500">
+        <AppIcon name="file-search" size="xl" icon-color="rgb(82 82 83)" />
+        <p class="text-sm mt-3">选择文件查看内容</p>
       </div>
-      <div v-else ref="editorContainer" class="monaco-container"></div>
+
+      <!-- 只读模式 -->
+      <div v-else-if="!editMode" class="h-full overflow-auto p-4">
+        <pre
+          v-if="projectStore.fileContent"
+          class="text-sm leading-relaxed text-zinc-300 whitespace-pre-wrap break-words font-mono"
+        >{{ projectStore.fileContent }}</pre>
+        <div v-else class="text-zinc-500">加载中...</div>
+      </div>
+
+      <!-- 编辑模式 - Monaco Editor -->
+      <div v-show="editMode" ref="editorContainer" class="h-full"></div>
     </div>
   </div>
 </template>
@@ -35,25 +67,20 @@ import AppButton from '~/components/base/AppButton.vue'
 
 const projectStore = useProjectStore()
 const editorContainer = ref<HTMLElement>()
+const editMode = ref(false)
+const loadingEditor = ref(false)
 const editorInstance = ref<any>(null)
-const content = ref('')
+const editorContent = ref('')
+const isUpdatingFromEditor = ref(false)
+const updateTimer = ref<any>(null)
 
 const hasChanges = computed(() => {
-  return content.value !== projectStore.fileContent
+  return editorContent.value !== projectStore.fileContent
 })
-
-const editorOptions = {
-  minimap: { enabled: false },
-  fontSize: 14,
-  lineNumbers: 'on',
-  scrollBeyondLastLine: false,
-  automaticLayout: true,
-  theme: 'vs-dark',
-}
 
 const language = computed(() => {
   if (!projectStore.currentFile) return 'plaintext'
-  const ext = projectStore.currentFile.split('.').pop()
+  const ext = projectStore.currentFile.split('.').pop()?.toLowerCase()
   const map: Record<string, string> = {
     ts: 'typescript',
     js: 'javascript',
@@ -63,9 +90,119 @@ const language = computed(() => {
     css: 'css',
     scss: 'scss',
     html: 'html',
+    xml: 'xml',
+    txt: 'plaintext',
   }
   return map[ext || ''] || 'plaintext'
 })
+
+const toggleEditMode = async () => {
+  if (editMode.value || loadingEditor.value) return
+
+  // 检查文件大小
+  if (projectStore.fileContent && projectStore.fileContent.length > 500 * 1024) {
+    alert('文件过大（超过500KB），建议使用其他编辑器')
+    return
+  }
+
+  loadingEditor.value = true
+
+  try {
+    // 动态导入 Monaco
+    const monaco = await import('monaco-editor')
+
+    if (!editorContainer.value) return
+
+    // 清空容器
+    editorContainer.value.innerHTML = ''
+
+    // 配置禁用所有 worker
+    ;(self as any).MonacoEnvironment = {
+      getWorker: function (_: any, label: string) {
+        // 返回空的 worker，禁用所有语言服务
+        return new Worker(URL.createObjectURL(new Blob([''], { type: 'text/javascript' })))
+      }
+    }
+
+    // 创建编辑器
+    editorInstance.value = monaco.editor.create(editorContainer.value, {
+      value: projectStore.fileContent || '',
+      language: language.value,
+      theme: 'vs-dark',
+      fontSize: 14,
+      lineHeight: 22,
+      fontFamily: "'JetBrains Mono', 'Consolas', monospace",
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+      tabSize: 2,
+      wordWrap: 'off',
+      lineNumbers: 'on',
+      // 完全禁用智能提示
+      quickSuggestions: false,
+      suggestOnTriggerCharacters: false,
+      acceptSuggestionOnEnter: 'off',
+      tabCompletion: 'off',
+    })
+
+    // 防抖监听内容变化 - 避免频繁更新导致卡死
+    editorInstance.value.onDidChangeModelContent(() => {
+      if (!editorInstance.value || isUpdatingFromEditor.value) return
+
+      // 清除之前的定时器
+      if (updateTimer.value) {
+        clearTimeout(updateTimer.value)
+      }
+
+      // 防抖更新，100ms 后执行
+      updateTimer.value = setTimeout(() => {
+        const newContent = editorInstance.value.getValue()
+
+        // 只有内容真正变化时才更新
+        if (newContent !== editorContent.value) {
+          isUpdatingFromEditor.value = true
+          editorContent.value = newContent
+          console.log('CodeEditor: content updated, length:', newContent.length)
+
+          // 下一个事件循环重置标志
+          nextTick(() => {
+            isUpdatingFromEditor.value = false
+          })
+        }
+      }, 100)
+    })
+
+    editorContent.value = projectStore.fileContent || ''
+    editMode.value = true
+
+    console.log('CodeEditor: edit mode enabled')
+  } catch (error) {
+    console.error('CodeEditor: failed to enable edit mode', error)
+  } finally {
+    loadingEditor.value = false
+  }
+}
+
+const exitEditMode = () => {
+  // 清理定时器
+  if (updateTimer.value) {
+    clearTimeout(updateTimer.value)
+    updateTimer.value = null
+  }
+
+  if (editorInstance.value) {
+    try {
+      editorInstance.value.dispose()
+    } catch (e) {
+      console.error('CodeEditor: dispose error', e)
+    }
+    editorInstance.value = null
+  }
+
+  editMode.value = false
+  editorContent.value = ''
+  isUpdatingFromEditor.value = false
+}
 
 const saveFile = async () => {
   if (!projectStore.currentProject || !projectStore.currentFile) return
@@ -76,106 +213,25 @@ const saveFile = async () => {
       body: {
         project: projectStore.currentProject.full_name,
         path: projectStore.currentFile,
-        content: content.value
+        content: editorContent.value
       }
     })
-    // 更新 store 中的内容
-    projectStore.setFileContent(content.value)
+    projectStore.setFileContent(editorContent.value)
   } catch (e) {
     console.error('Failed to save file:', e)
   }
 }
 
-// 初始化 Monaco Editor
-onMounted(async () => {
-  const monaco = await import('monaco-editor/esm/vs/editor/editor.main')
-  if (editorContainer.value) {
-    editorInstance.value = monaco.editor.create(editorContainer.value, {
-      value: '',
-      language: 'plaintext',
-      theme: 'vs-dark',
-      ...editorOptions,
-      automaticLayout: true,
-    })
+// 切换文件时退出编辑模式
+watch(() => projectStore.currentFile, (newFile, oldFile) => {
+  if (newFile !== oldFile) {
+    console.log('CodeEditor: file changed from', oldFile, 'to', newFile)
+    exitEditMode()
   }
 })
 
-// 监听文件变化
-watch(() => projectStore.fileContent, (newVal) => {
-  content.value = newVal
-  if (editorInstance.value) {
-    editorInstance.value.setValue(newVal)
-  }
-})
-
-// 监听当前文件变化，更新语言
-watch(() => projectStore.currentFile, () => {
-  if (editorInstance.value) {
-    const monaco = window.monaco
-    if (monaco) {
-      const model = editorInstance.value.getModel()
-      if (model) {
-        monaco.editor.setModelLanguage(model, language.value)
-      }
-    }
-  }
-})
-
-// 监听编辑器内容变化
-watch(content, (newVal) => {
-  // 这里不需要做任何事，因为内容已经在 content 中
+// 组件卸载时清理
+onUnmounted(() => {
+  exitEditMode()
 })
 </script>
-
-<style scoped>
-.code-editor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: rgba(15, 23, 42, 0.3);
-}
-
-.editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-3) var(--spacing-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(15, 23, 42, 0.5);
-}
-
-.file-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.file-name {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: #f1f5f9;
-}
-
-.editor-body {
-  flex: 1;
-  overflow: hidden;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: rgba(241, 245, 249, 0.4);
-}
-
-.empty-icon {
-  opacity: 0.3;
-  margin-bottom: var(--spacing-3);
-}
-
-.monaco-container {
-  height: 100%;
-}
-</style>

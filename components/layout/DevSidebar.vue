@@ -1,69 +1,86 @@
 <!-- components/layout/DevSidebar.vue -->
 <template>
-  <aside class="dev-sidebar">
-    <div class="sidebar-header">
-      <div class="header-content">
-        <AppIcon name="lucide:folder-git-2" class="header-icon" />
-        <div>
-          <h2 class="sidebar-title">GitHub 项目</h2>
-          <p class="sidebar-subtitle">{{ projects.length }} 个仓库</p>
+  <aside class="h-full flex flex-col">
+    <div class="flex items-center justify-between gap-3 p-4 border-b border-white/5">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <AppIcon name="folder-git-2" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+        <div class="min-w-0 flex-1">
+          <h2 class="text-sm font-semibold text-zinc-100 leading-tight">GitHub 项目</h2>
+          <p class="text-xs text-zinc-500 leading-tight">{{ projects.length }} 个仓库</p>
         </div>
       </div>
-      <div class="header-actions">
-        <button 
-          class="icon-btn" 
-          :class="{ spinning: loading }"
-          title="刷新"
-          @click="refreshProjects"
-        >
-          <AppIcon name="lucide:refresh-cw" />
-        </button>
-      </div>
+      <AppIcon
+        name="refresh-cw"
+        size="sm"
+        variant="subtle"
+        background="outlined"
+        :loading="loading"
+        clickable
+        title="刷新"
+        @click="refreshProjects"
+      />
     </div>
 
-    <div class="sidebar-content scrollbar-hover">
+    <div class="flex-1 overflow-y-auto p-2 space-y-1">
       <div
         v-for="project in projects"
         :key="project.id"
-        class="project-item"
-        :class="{ active: currentProject?.full_name === project.full_name }"
+        class="group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 hover:bg-white/5 relative"
+        :class="{ 'bg-amber-500/10': currentProject?.full_name === project.full_name }"
         @click="selectProject(project)"
       >
         <!-- 选中指示条 -->
-        <div class="indicator-bar" v-if="currentProject?.full_name === project.full_name" />
-        <div class="project-status">
-          <span 
-            class="status-dot" 
-            :class="{ exists: project.localExists }"
+        <div
+          v-if="currentProject?.full_name === project.full_name"
+          class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"
+        />
+
+        <div class="flex-shrink-0">
+          <span
+            class="block w-2 h-2 rounded-full ring-2 ring-transparent transition-all"
+            :class="project.localExists
+              ? 'bg-emerald-400 ring-emerald-400/20'
+              : 'bg-zinc-600 ring-zinc-600/20'"
             :title="project.localExists ? '本地已存在' : '本地不存在'"
           />
         </div>
-        <div class="project-info">
-          <span class="project-name">{{ project.name }}</span>
-          <span class="project-branch" v-if="project.branches && project.branches.length">
+
+        <div class="flex-1 min-w-0 pr-3 flex flex-col gap-0.5">
+          <span class="text-sm font-medium text-zinc-200 truncate group-hover:text-zinc-100 transition-colors">
+            {{ project.name }}
+          </span>
+          <span v-if="project.branches && project.branches.length" class="text-xs text-zinc-600">
             {{ formatBranches(project.branches, project.default_branch) }}
           </span>
         </div>
-        <button 
-          class="action-btn"
-          :class="{ loading: cloning === project.full_name }"
-          :title="project.localExists ? '更新项目' : '克隆到本地'"
+
+        <AppIcon
+          :name="cloning === project.full_name ? 'loader-2' : (project.localExists ? 'download' : 'plus')"
+          size="sm"
+          variant="subtle"
+          background="outlined"
+          :class="cloning === project.full_name ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : ''"
+          :loading="cloning === project.full_name"
+          clickable
           @click.stop="cloneProject(project)"
-        >
-          <AppIcon v-if="cloning === project.full_name" name="lucide:loader-2" class="spin" />
-          <AppIcon v-else :name="project.localExists ? 'lucide:download' : 'lucide:plus'" />
-        </button>
+        />
       </div>
 
-      <div v-if="projects.length === 0 && !loading" class="empty-state">
-        <AppIcon name="lucide:folder-open" class="empty-icon" />
-        <p class="empty-text">暂无仓库</p>
-        <p class="empty-hint">在 GitHub 创建仓库后会自动显示</p>
+      <div v-if="projects.length === 0 && !loading" class="flex flex-col items-center gap-4 p-8 text-center">
+        <div class="w-12 h-12 flex-center rounded-xl bg-zinc-800/50 border border-white/5">
+          <AppIcon name="folder-open" size="lg" icon-color="rgb(82 82 83)" />
+        </div>
+        <div class="space-y-1">
+          <p class="text-sm font-medium text-zinc-400">暂无仓库</p>
+          <p class="text-xs text-zinc-600">在 GitHub 创建仓库后会自动显示</p>
+        </div>
       </div>
 
-      <div v-if="loading && projects.length === 0" class="loading-state">
-        <AppIcon name="lucide:loader-2" class="spin" />
-        <p>加载中...</p>
+      <div v-if="loading && projects.length === 0" class="flex flex-col items-center gap-4 p-8 text-center">
+        <div class="w-12 h-12 flex-center rounded-xl bg-zinc-800/50 border border-white/5">
+          <AppIcon name="loader-2" size="lg" icon-color="rgb(251 191 36)" />
+        </div>
+        <p class="text-sm text-zinc-500">加载中...</p>
       </div>
     </div>
   </aside>
@@ -71,6 +88,7 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
+import AppIcon from '~/components/base/AppIcon.vue'
 
 interface Project {
   id: number
@@ -89,7 +107,6 @@ const projects = ref<Project[]>([])
 const loading = ref(false)
 const cloning = ref<string | null>(null)
 
-// 加载项目列表
 const loadProjects = async (refresh = false) => {
   loading.value = true
   try {
@@ -102,12 +119,10 @@ const loadProjects = async (refresh = false) => {
   }
 }
 
-// 刷新项目列表
 const refreshProjects = () => {
   loadProjects(true)
 }
 
-// 克隆/更新项目
 const cloneProject = async (project: Project) => {
   cloning.value = project.full_name
   try {
@@ -119,7 +134,6 @@ const cloneProject = async (project: Project) => {
         name: project.name
       }
     })
-    // 刷新状态
     await loadProjects()
   } catch (error: any) {
     alert(error.message || '操作失败')
@@ -128,12 +142,10 @@ const cloneProject = async (project: Project) => {
   }
 }
 
-// 选择项目
 const selectProject = (project: Project) => {
   projectStore.setCurrentProject(project)
 }
 
-// 格式化分支显示
 const formatBranches = (branches: string[], defaultBranch: string): string => {
   if (!branches || branches.length === 0) return ''
   const otherCount = branches.length - 1
@@ -147,206 +159,3 @@ onMounted(() => {
   loadProjects()
 })
 </script>
-
-<style scoped>
-.dev-sidebar {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-secondary);
-}
-
-.sidebar-header {
-  padding: var(--spacing-3);
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--spacing-2);
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.header-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--color-primary);
-}
-
-.sidebar-title {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-
-.sidebar-subtitle {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-  line-height: 1.3;
-}
-
-.header-actions {
-  display: flex;
-  gap: var(--spacing-1);
-}
-
-.icon-btn {
-  padding: 4px;
-  border-radius: var(--radius-unified);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-}
-
-.icon-btn.spinning {
-  animation: spin 1s linear infinite;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-2);
-}
-
-.project-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-unified);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  position: relative;
-}
-
-.project-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.project-item.active {
-  background: rgba(245, 158, 11, 0.1);
-}
-
-/* 选中指示条 */
-.indicator-bar {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
-  background: var(--color-primary);
-  border-radius: 0 2px 2px 0;
-}
-
-.project-status {
-  flex-shrink: 0;
-}
-
-.status-dot {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-error);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.status-dot.exists {
-  background: var(--color-success);
-  border-color: rgba(34, 197, 94, 0.3);
-}
-
-.project-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-right: var(--spacing-2);
-}
-
-.project-name {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.project-branch {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-.action-btn {
-  flex-shrink: 0;
-  padding: 4px;
-  border-radius: var(--radius-unified);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  background: transparent;
-  border: none;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-btn:hover {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--color-primary);
-}
-
-.action-btn.loading {
-  color: var(--color-primary);
-}
-
-.empty-state,
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-8) var(--spacing-4);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.empty-icon {
-  width: 32px;
-  height: 32px;
-  opacity: 0.3;
-}
-
-.empty-text {
-  font-size: var(--text-sm);
-}
-
-.empty-hint {
-  font-size: var(--text-xs);
-  opacity: 0.7;
-}
-</style>

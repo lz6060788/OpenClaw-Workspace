@@ -1,24 +1,28 @@
 <!-- components/dev/PreviewPanel.vue -->
 <template>
-  <div class="preview-panel">
-    <div v-if="previewUrl" class="iframe-wrapper">
+  <div class="preview-panel flex flex-col h-full bg-zinc-900/50">
+    <div v-if="previewUrl" class="flex-1 relative">
       <iframe
         :src="previewUrl"
-        class="preview-iframe"
+        class="w-full h-full border-none bg-white"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
-      <button class="refresh-button" @click="refresh" title="刷新">
+      <button
+        class="absolute bottom-4 right-4 w-10 h-10 flex-center rounded-full bg-zinc-900/90 border border-white/10 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 backdrop-blur-sm transition-all active:scale-95"
+        title="刷新"
+        @click="refresh"
+      >
         <AppIcon name="refresh-cw" size="sm" />
       </button>
     </div>
-    <div v-else class="empty-state">
-      <AppIcon name="monitor" size="xl" class="empty-icon" />
-      <h4>未启动预览</h4>
-      <p>启动开发服务器后，这里会显示实时预览</p>
-      <div class="empty-hints">
-        <p>尝试在对话中说：</p>
-        <code>"启动 dev 服务器"</code>
-        <code>"npm run dev"</code>
+    <div v-else class="flex flex-col items-center justify-center h-full p-8 text-center">
+      <AppIcon name="monitor" size="xl" icon-color="rgb(82 82 83)" />
+      <h4 class="text-lg font-semibold text-zinc-200 mt-4 mb-2">未启动预览</h4>
+      <p class="text-sm text-zinc-500 mb-6">启动开发服务器后，这里会显示实时预览</p>
+      <div class="p-4 bg-zinc-800/30 rounded-xl border border-white/5 text-left">
+        <p class="text-xs text-zinc-500 mb-3">尝试在对话中说：</p>
+        <code class="block px-3 py-2 bg-zinc-950/50 rounded-lg font-mono text-sm text-amber-400 mb-2">"启动 dev 服务器"</code>
+        <code class="block px-3 py-2 bg-zinc-950/50 rounded-lg font-mono text-sm text-amber-400">"npm run dev"</code>
       </div>
     </div>
   </div>
@@ -30,108 +34,9 @@ import AppIcon from '~/components/base/AppIcon.vue'
 const previewUrl = ref('')
 
 const refresh = () => {
-  const iframe = document.querySelector('.preview-iframe')
+  const iframe = document.querySelector('.preview-iframe') as HTMLIFrameElement
   if (iframe) {
     iframe.src = iframe.src
   }
 }
-
-// TODO: 监听项目状态，自动显示预览
-// 例如：当检测到 3000 端口时，设置 previewUrl.value = '/api/dev/3000/'
 </script>
-
-<style scoped>
-.preview-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: rgba(15, 23, 42, 0.3);
-}
-
-.iframe-wrapper {
-  flex: 1;
-  position: relative;
-}
-
-.preview-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: white;
-}
-
-.refresh-button {
-  position: absolute;
-  bottom: var(--spacing-4);
-  right: var(--spacing-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  color: rgba(241, 245, 249, 0.7);
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
-}
-
-.refresh-button:hover {
-  background: rgba(30, 41, 59, 0.9);
-  color: #f1f5f9;
-  transform: scale(1.1);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: var(--spacing-8);
-  text-align: center;
-}
-
-.empty-icon {
-  opacity: 0.2;
-  margin-bottom: var(--spacing-4);
-}
-
-.empty-state h4 {
-  font-size: var(--text-lg);
-  font-weight: 600;
-  color: #f1f5f9;
-  margin-bottom: var(--spacing-2);
-}
-
-.empty-state > p {
-  color: rgba(241, 245, 249, 0.5);
-  margin-bottom: var(--spacing-4);
-}
-
-.empty-hints {
-  padding: var(--spacing-4);
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: var(--radius-lg);
-  text-align: left;
-}
-
-.empty-hints p {
-  font-size: var(--text-sm);
-  color: rgba(241, 245, 249, 0.5);
-  margin-bottom: var(--spacing-2);
-}
-
-.empty-hints code {
-  display: block;
-  padding: var(--spacing-2) var(--spacing-3);
-  margin-top: var(--spacing-2);
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius-md);
-  font-family: monospace;
-  font-size: var(--text-sm);
-  color: #60a5fa;
-}
-</style>

@@ -54,20 +54,32 @@ export default defineNuxtConfig({
       // 文字
       'text-title': 'text-lg font-semibold',
       'text-subtitle': 'text-sm font-medium',
-      'text-body': 'text-sm text-gray-400',
-      'text-muted': 'text-xs text-gray-500',
+      'text-body': 'text-sm text-zinc-400',
+      'text-muted': 'text-xs text-zinc-500',
 
       // 圆角
       'rounded-card': 'rounded-xl',
-      'rounded-btn': 'rounded-lg',
-      'rounded-input': 'rounded-lg',
+      'rounded-btn': 'rounded-xl',
+      'rounded-input': 'rounded-2xl',
 
       // 阴影
-      'shadow-card': 'shadow-lg shadow-gray-900/20',
-      'shadow-card-lg': 'shadow-xl shadow-gray-900/30',
+      'shadow-card': 'shadow-lg shadow-zinc-900/20',
+      'shadow-card-lg': 'shadow-xl shadow-zinc-900/30',
 
       // 过渡
       'transition-all': 'transition-all duration-200 ease-out',
+
+      // 图标尺寸
+      'icon-xs': 'w-3 h-3',
+      'icon-sm': 'w-4 h-4',
+      'icon-md': 'w-5 h-5',
+      'icon-lg': 'w-6 h-6',
+      'icon-xl': 'w-8 h-8',
+
+      // 按钮基础样式
+      'btn-base': 'flex-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95',
+      'btn-ghost': 'btn-base bg-zinc-800/50 border border-white/5 text-zinc-400 hover:bg-white/5 hover:text-zinc-300',
+      'btn-primary': 'btn-base bg-gradient-to-br from-amber-400 to-amber-600 text-white hover:shadow-lg hover:shadow-amber-500/20',
     },
     theme: {
       colors: {
@@ -95,12 +107,39 @@ export default defineNuxtConfig({
       title: 'OpenClaw Workspace',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'OpenClaw 个人开发后台' }
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover' },
+        { name: 'description', content: 'OpenClaw 个人开发后台' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        { name: 'theme-color', content: '#18181B' }
+      ],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }
       ],
     }
   },
 
   // 兼容性问题
   compatibilityDate: '2024-11-01',
+
+  // Vite 配置
+  vite: {
+    server: {
+      allowedHosts: true, // 允许所有主机
+      hmr: {
+        protocol: 'wss', // 生产环境使用 wss
+        host: 'dev.theirises.cn',
+        overlay: true
+      },
+      watch: {
+        usePolling: true // 使用轮询以确保 HMR 在代理后正常工作
+      }
+    },
+    // Worker 配置
+    worker: {
+      format: 'es'
+    }
+  }
 })
