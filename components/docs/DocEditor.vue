@@ -3,19 +3,19 @@
   <div class="doc-editor">
     <div class="editor-header">
       <div class="doc-info">
-        <AppIcon name="file-text" size="sm" color="purple-400" />
+        <Icon name="file-text" size="sm" color="purple-400" />
         <span class="doc-name">{{ docsStore.currentDoc || '选择文档' }}</span>
       </div>
       <div class="header-actions">
-        <AppButton
+        <el-button
           variant="ghost"
           size="sm"
           icon="refresh-cw"
           @click="refresh"
         >
           刷新
-        </AppButton>
-        <AppButton
+        </el-button>
+        <el-button
           v-if="docsStore.currentDoc && hasChanges"
           variant="primary"
           size="sm"
@@ -23,12 +23,12 @@
           @click="saveDoc"
         >
           保存
-        </AppButton>
+        </el-button>
       </div>
     </div>
     <div class="editor-body">
       <div v-if="!docsStore.currentDoc" class="empty-state">
-        <AppIcon name="book-open" size="xl" class="empty-icon" />
+        <Icon name="book-open" size="xl" class="empty-icon" />
         <p>选择左侧文档进行编辑</p>
       </div>
       <div v-else ref="editorContainer" class="monaco-container"></div>
@@ -38,8 +38,8 @@
 
 <script setup lang="ts">
 import { useDocsStore } from '~/stores/docs'
-import AppIcon from '~/components/base/AppIcon.vue'
-import AppButton from '~/components/base/AppButton.vue'
+import * as Icons from '@element-plus/icons-vue'
+
 
 const docsStore = useDocsStore()
 const editorContainer = ref<HTMLElement>()

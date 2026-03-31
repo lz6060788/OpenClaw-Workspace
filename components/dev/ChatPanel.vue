@@ -4,17 +4,17 @@
     <!-- 顶部标题栏 -->
     <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/30 backdrop-blur-sm min-h-[56px]">
       <div class="flex items-center gap-3 min-w-0 flex-1">
-        <AppIcon name="message-square" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+        <Icon name="message-square" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
         <div class="flex items-center gap-1.5 min-w-0">
           <span class="text-sm text-zinc-500 hidden md:inline">GitHub 项目</span>
-          <AppIcon name="chevron-right" size="xs" icon-color="rgb(63 63 70)" />
+          <Icon name="chevron-right" size="xs" icon-color="rgb(63 63 70)" />
           <span class="text-sm text-zinc-400 truncate">{{ currentProjectName || '对话' }}</span>
         </div>
       </div>
       <div class="flex items-center gap-1">
-        <AppIcon name="plus" size="sm" variant="subtle" background="outlined" clickable title="新建对话" />
-        <AppIcon name="history" size="sm" variant="subtle" background="outlined" clickable title="历史记录" class="hidden md:flex" />
-        <AppIcon name="trash-2" size="sm" variant="danger" background="outlined" clickable title="清空对话" />
+        <Icon name="plus" size="sm" variant="subtle" background="outlined" clickable title="新建对话" />
+        <Icon name="history" size="sm" variant="subtle" background="outlined" clickable title="历史记录" class="hidden md:flex" />
+        <Icon name="trash-2" size="sm" variant="danger" background="outlined" clickable title="清空对话" />
       </div>
     </div>
 
@@ -27,11 +27,11 @@
       <p class="text-sm text-zinc-500 mb-6 max-w-sm">该项目还未克隆到本地工作区。请在左侧侧边栏点击下载按钮将项目克隆到本地。</p>
       <div class="flex flex-col gap-3 text-sm text-zinc-400">
         <div class="flex items-center gap-3 px-4 py-3 bg-zinc-800/50 rounded-xl border border-white/5">
-          <AppIcon name="download" size="sm" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+          <Icon name="download" size="sm" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
           <span>在项目列表中点击下载图标</span>
         </div>
         <div class="flex items-center gap-3 px-4 py-3 bg-zinc-800/50 rounded-xl border border-white/5">
-          <AppIcon name="folder-git-2" size="sm" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+          <Icon name="folder-git-2" size="sm" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
           <span>等待克隆完成后即可开始开发</span>
         </div>
       </div>
@@ -48,19 +48,19 @@
         <p class="text-sm text-zinc-500 mb-6">选择一个 GitHub 项目开始开发</p>
         <div class="flex flex-wrap gap-2 justify-center">
           <div class="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 rounded-lg border border-white/5">
-            <AppIcon name="file-plus" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+            <Icon name="file-plus" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
             <span class="text-sm text-zinc-400">创建新文件</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 rounded-lg border border-white/5">
-            <AppIcon name="edit-3" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+            <Icon name="edit-3" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
             <span class="text-sm text-zinc-400">修改代码</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 rounded-lg border border-white/5">
-            <AppIcon name="zap" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+            <Icon name="zap" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
             <span class="text-sm text-zinc-400">添加功能</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 rounded-lg border border-white/5">
-            <AppIcon name="bug" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+            <Icon name="bug" size="xs" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
             <span class="text-sm text-zinc-400">修复 Bug</span>
           </div>
         </div>
@@ -98,7 +98,7 @@
           @keyup.enter="sendMessage"
           class="flex-1 bg-transparent border-none text-zinc-100 text-sm placeholder:text-zinc-600 outline-none px-2"
         />
-        <AppIcon
+        <Icon
           :name="isLoading ? 'loader-2' : 'send'"
           size="md"
           variant="primary"
@@ -115,7 +115,7 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import AppIcon from '~/components/base/AppIcon.vue'
+import * as Icons from '@element-plus/icons-vue'
 
 const projectStore = useProjectStore()
 const currentProject = computed(() => projectStore.currentProject)

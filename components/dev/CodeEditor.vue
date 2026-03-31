@@ -4,36 +4,42 @@
     <!-- 编辑器头部 -->
     <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/50">
       <div class="flex items-center gap-2 min-w-0 flex-1">
-        <AppIcon name="file-code" size="sm" icon-color="rgb(96 165 250)" />
+        <el-icon :size="16" color="rgb(96 165 250)">
+          <IconsDocumentCopy />
+        </el-icon>
         <span class="text-sm font-medium text-zinc-100 truncate">
           {{ projectStore.currentFile || '未选择文件' }}
         </span>
         <span v-if="!editMode" class="text-xs text-zinc-500">(只读)</span>
       </div>
       <div class="flex items-center gap-2">
-        <button
+        <el-button
           v-if="projectStore.currentFile && !editMode"
+          :loading="loadingEditor"
+          type="warning"
+          size="small"
+          text
           @click="toggleEditMode"
-          class="text-xs text-amber-400 hover:text-amber-300 transition-colors px-2 py-1 rounded hover:bg-amber-500/10"
         >
           {{ loadingEditor ? '加载中...' : '编辑模式' }}
-        </button>
-        <AppButton
+        </el-button>
+        <el-button
           v-if="editMode && hasChanges"
-          variant="primary"
-          size="sm"
-          icon="save"
+          type="primary"
+          size="small"
+          :icon="IconsCheck"
           @click="saveFile"
         >
           保存
-        </AppButton>
-        <button
+        </el-button>
+        <el-button
           v-if="editMode"
+          size="small"
+          text
           @click="exitEditMode"
-          class="text-xs text-zinc-400 hover:text-zinc-300 transition-colors px-2 py-1 rounded hover:bg-white/5"
         >
           退出编辑
-        </button>
+        </el-button>
       </div>
     </div>
 
@@ -41,7 +47,9 @@
     <div class="flex-1 overflow-hidden relative">
       <!-- 未选择文件 -->
       <div v-if="!projectStore.currentFile" class="flex flex-col items-center justify-center h-full text-zinc-500">
-        <AppIcon name="file-search" size="xl" icon-color="rgb(82 82 83)" />
+        <el-icon :size="48" color="rgb(82 82 83)">
+          <IconsSearch />
+        </el-icon>
         <p class="text-sm mt-3">选择文件查看内容</p>
       </div>
 
@@ -62,8 +70,11 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import AppIcon from '~/components/base/AppIcon.vue'
-import AppButton from '~/components/base/AppButton.vue'
+import * as Icons from '@element-plus/icons-vue'
+
+const IconsCheck = Icons.Check
+const IconsDocumentCopy = Icons.DocumentCopy
+const IconsSearch = Icons.Search
 
 const projectStore = useProjectStore()
 const colorMode = useColorMode()

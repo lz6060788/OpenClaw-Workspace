@@ -2,7 +2,7 @@
 <template>
   <aside class="docs-sidebar">
     <div class="sidebar-header">
-      <AppIcon name="book-open" size="md" />
+      <Icon name="book-open" size="md" />
       <div>
         <h2 class="sidebar-title">OpenClaw 文档</h2>
       </div>
@@ -12,7 +12,7 @@
       <!-- 配置文件 -->
       <div class="sidebar-section">
         <button class="section-header" @click="toggleSection('config')">
-          <AppIcon :name="isExpanded.config ? 'chevron-down' : 'chevron-right'" size="xs" />
+          <Icon :name="isExpanded.config ? 'chevron-down' : 'chevron-right'" size="xs" />
           <span>配置文件</span>
         </button>
         <Transition name="collapse">
@@ -24,7 +24,7 @@
               :class="{ active: docsStore.currentDoc === file }"
               @click="selectDoc(file)"
             >
-              <AppIcon name="file" size="xs" />
+              <Icon name="file" size="xs" />
               <span>{{ file }}</span>
             </div>
           </div>
@@ -34,7 +34,7 @@
       <!-- Skills -->
       <div class="sidebar-section">
         <button class="section-header" @click="toggleSection('skills')">
-          <AppIcon :name="isExpanded.skills ? 'chevron-down' : 'chevron-right'" size="xs" />
+          <Icon :name="isExpanded.skills ? 'chevron-down' : 'chevron-right'" size="xs" />
           <span>Skills</span>
         </button>
         <Transition name="collapse">
@@ -46,7 +46,7 @@
               :class="{ active: docsStore.currentDoc === `skills/${skill}` }"
               @click="selectDoc(`skills/${skill}`)"
             >
-              <AppIcon name="sparkles" size="xs" />
+              <Icon name="sparkles" size="xs" />
               <span>{{ skill }}</span>
             </div>
             <div v-if="docsStore.skills.length === 0" class="loading-state">
@@ -59,7 +59,7 @@
       <!-- Memory -->
       <div class="sidebar-section">
         <button class="section-header" @click="toggleSection('memory')">
-          <AppIcon :name="isExpanded.memory ? 'chevron-down' : 'chevron-right'" size="xs" />
+          <Icon :name="isExpanded.memory ? 'chevron-down' : 'chevron-right'" size="xs" />
           <span>Memory</span>
         </button>
         <Transition name="collapse">
@@ -71,7 +71,7 @@
               :class="{ active: docsStore.currentDoc === `memory/${file}` }"
               @click="selectDoc(`memory/${file}`)"
             >
-              <AppIcon name="calendar" size="xs" />
+              <Icon name="calendar" size="xs" />
               <span>{{ file.replace('.md', '') }}</span>
             </div>
             <div v-if="docsStore.memoryFiles.length === 0" class="loading-state">
@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { useDocsStore } from '~/stores/docs'
-import AppIcon from '~/components/base/AppIcon.vue'
+import * as Icons from '@element-plus/icons-vue'
 
 const emit = defineEmits(['select'])
 

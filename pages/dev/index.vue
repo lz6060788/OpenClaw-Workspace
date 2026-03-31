@@ -1,64 +1,57 @@
 <!-- pages/dev/index.vue -->
 <template>
-  <div class="flex h-full overflow-hidden relative bg-zinc-900">
+  <div class="flex h-full overflow-hidden bg-zinc-900">
     <!-- AI对话主区域 -->
     <ChatPanel class="flex-1 min-w-0 flex flex-col" />
 
-    <!-- 可展开的工具面板 -->
-    <div
-      class="absolute top-0 right-0 bottom-0 bg-zinc-800/95 backdrop-blur-xl border-l border-white/5 flex flex-col overflow-hidden transition-all duration-300 ease-out z-20"
-      :class="{ 'w-0': !panelsOpen, 'w-full md:w-[720px]': panelsOpen }"
+    <!-- Element Plus Drawer 抽屉 -->
+    <el-drawer
+      v-model="panelsOpen"
+      direction="rtl"
+      :size="720"
+      class="dev-drawer"
     >
-      <!-- 面板头部 - Tabs样式 -->
-      <div v-show="panelsOpen" class="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/50">
-        <!-- Tab按钮 -->
-        <div class="flex items-center gap-1">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            class="relative px-4 py-2 text-sm font-medium transition-all duration-200 after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:transition-all after:duration-200"
-            :class="activeTab === tab.key
-              ? 'text-amber-400 after:bg-amber-400'
-              : 'text-zinc-500 hover:text-zinc-400 after:bg-transparent'"
-            @click="activeTab = tab.key"
-          >
-            <span class="hidden md:inline">{{ tab.label }}</span>
-            <AppIcon :name="tab.icon" size="xs" class="md:hidden" :icon-color="activeTab === tab.key ? 'rgb(251 191 36)' : ''" />
-          </button>
-        </div>
-        <AppIcon
-          name="x"
-          size="sm"
-          variant="subtle"
-          clickable
-          class="ml-auto"
-          @click="panelsOpen = false"
-        />
-      </div>
+      <template #header>
+        <el-tabs v-model="activeTab" class="drawer-tabs">
+          <el-tab-pane label="文件" name="files">
+            <template #label>
+              <span class="flex items-center gap-1.5">
+                <el-icon><IconsFolder /></el-icon>
+                <span>文件</span>
+              </span>
+            </template>
+          </el-tab-pane>
+          <el-tab-pane label="预览" name="preview">
+            <template #label>
+              <span class="flex items-center gap-1.5">
+                <el-icon><IconsView /></el-icon>
+                <span>预览</span>
+              </span>
+            </template>
+          </el-tab-pane>
+        </el-tabs>
+      </template>
 
-      <div class="flex-1 overflow-hidden">
-        <FileArea v-if="activeTab === 'files'" class="h-full" />
-        <PreviewPanel v-else-if="activeTab === 'preview'" class="h-full" />
-      </div>
-    </div>
+      <FileArea v-if="activeTab === 'files'" class="h-full" />
+      <PreviewPanel v-else-if="activeTab === 'preview'" class="h-full" />
+    </el-drawer>
 
     <!-- 浮动工具按钮 -->
     <Transition name="fab-slide">
-      <AppIcon
+      <el-button
         v-if="!panelsOpen"
-        name="layers"
-        size="lg"
-        variant="primary"
-        background="filled"
-        clickable
-        class="absolute z-10 shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
+        type="primary"
+        size="large"
+        circle
+        class="absolute z-10 fab-button"
         :class="[
           'top-1/2 -translate-y-1/2',
           'right-4'
         ]"
-        title="打开工具面板"
         @click="panelsOpen = true"
-      />
+      >
+        <el-icon><IconsMenu /></el-icon>
+      </el-button>
     </Transition>
   </div>
 </template>
@@ -67,18 +60,74 @@
 import ChatPanel from '~/components/dev/ChatPanel.vue'
 import PreviewPanel from '~/components/dev/PreviewPanel.vue'
 import FileArea from '~/components/dev/FileArea.vue'
-import AppIcon from '~/components/base/AppIcon.vue'
+import * as Icons from '@element-plus/icons-vue'
 
 const panelsOpen = ref(false)
 const activeTab = ref('files')
 
-const tabs = [
-  { key: 'files', label: '文件', icon: 'folder' },
-  { key: 'preview', label: '预览', icon: 'eye' }
-]
+// 解构图标组件以便在模板中使用
+const IconsFolder = Icons.Folder
+const IconsView = Icons.View
+const IconsMenu = Icons.Menu
 </script>
 
 <style scoped>
+:deep(.dev-drawer) {
+  background: rgb(24 24 27 / 0.95);
+  backdrop-filter: blur(20px);
+}
+
+:deep(.dev-drawer .el-drawer__header) {
+  margin-bottom: 0;
+  padding: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+  background: rgb(39 39 42 / 0.5);
+}
+
+:deep(.dev-drawer .el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+:deep(.drawer-tabs .el-tabs__header) {
+  margin: 0;
+  padding: 0 16px;
+  background: transparent;
+}
+
+:deep(.drawer-tabs .el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+:deep(.drawer-tabs .el-tabs__item) {
+  color: rgb(161 161 170);
+  font-weight: 500;
+}
+
+:deep(.drawer-tabs .el-tabs__item.is-active) {
+  color: rgb(251 191 36);
+}
+
+:deep(.drawer-tabs .el-tabs__active-bar) {
+  background-color: rgb(251 191 36);
+}
+
+.fab-button {
+  background: linear-gradient(to bottom right, rgb(251 191 36), rgb(217 119 6));
+  border: none;
+  box-shadow: 0 10px 15px -3px rgb(251 191 36 / 0.2);
+  transition: all 0.3s ease;
+}
+
+.fab-button:hover {
+  box-shadow: 0 20px 25px -5px rgb(251 191 36 / 0.3);
+  transform: scale(1.05);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+}
+
 .fab-slide-enter-active,
 .fab-slide-leave-active {
   transition: all 0.3s ease-out;

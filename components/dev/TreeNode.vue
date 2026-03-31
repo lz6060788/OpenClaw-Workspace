@@ -7,7 +7,7 @@
       @click="handleClick"
     >
       <!-- 展开/折叠图标 -->
-      <AppIcon
+      <Icon
         v-if="node.isDirectory"
         :name="isExpanded ? 'chevron-down' : 'chevron-right'"
         size="xs"
@@ -17,7 +17,7 @@
       <span v-else class="w-3.5 shrink-0"></span>
 
       <!-- 文件/文件夹图标 -->
-      <AppIcon
+      <Icon
         :name="node.isDirectory ? (isExpanded ? 'folder-open' : 'folder') : 'file'"
         size="xs"
         :icon-color="node.isDirectory ? 'rgb(251 191 36)' : 'rgb(115 115 125)'"
@@ -27,7 +27,7 @@
       <span class="flex-1 truncate">{{ node.name }}</span>
 
       <!-- Loading指示器 -->
-      <AppIcon
+      <Icon
         v-if="loading"
         name="loader-2"
         size="xs"
@@ -54,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import AppIcon from '~/components/base/AppIcon.vue'
+import { useProjectStore } from '~/stores/project'
+import * as Icons from '@element-plus/icons-vue'
 
 const props = defineProps({
   node: {
@@ -69,10 +70,15 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])
 
+const projectStore = useProjectStore()
 const isExpanded = ref(false)
-const isSelected = ref(false)
 const loading = ref(false)
 const hasLoaded = ref(false)
+
+// 从 projectStore 获取当前选中状态
+const isSelected = computed(() => {
+  return projectStore.currentFile === props.node.path
+})
 
 const handleClick = async () => {
   if (props.node.isDirectory) {
@@ -87,11 +93,8 @@ const handleClick = async () => {
       isExpanded.value = true
     }
   } else {
-    // 文件点击：避免重复选择
-    if (!isSelected.value) {
-      isSelected.value = true
-      emit('select', props.node)
-    }
+    // 文件点击：总是触发选择事件
+    emit('select', props.node)
   }
 }
 

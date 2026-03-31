@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   // 禁用 SSR，使用 SPA 模式
   ssr: false,
 
-  // Nuxt UI v3 + UnoCSS + Pinia
+  // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia
   modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt'],
 
   // 引入自定义 CSS

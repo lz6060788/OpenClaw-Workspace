@@ -20,7 +20,9 @@
             ? 'bg-amber-500/10 text-amber-400'
             : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'"
         >
-          <AppIcon name="code-2" size="sm" :icon-color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''" />
+          <el-icon :size="16" :color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''">
+            <IconsDocument />
+          </el-icon>
           <span class="text-[10px] font-medium">开发</span>
         </NuxtLink>
         <NuxtLink
@@ -30,20 +32,22 @@
             ? 'bg-amber-500/10 text-amber-400'
             : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'"
         >
-          <AppIcon name="file-text" size="sm" :icon-color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''" />
+          <el-icon :size="16" :color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''">
+            <IconsDocument />
+          </el-icon>
           <span class="text-[10px] font-medium">文档</span>
         </NuxtLink>
       </nav>
 
-      <AppIcon
-        :name="sidebarCollapsed ? 'chevron-right' : 'chevron-left'"
-        size="sm"
-        variant="subtle"
-        background="filled"
-        clickable
+      <el-icon
+        :size="16"
+        class="cursor-pointer hover:scale-110 transition-transform p-2"
         :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'"
         @click="sidebarCollapsed = !sidebarCollapsed"
-      />
+      >
+        <IconsArrowLeft v-if="!sidebarCollapsed" />
+        <IconsArrowRight v-else />
+      </el-icon>
     </aside>
 
     <!-- 桌面端二级侧边栏 -->
@@ -69,14 +73,14 @@
           </div>
         </div>
 
-        <button
-          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10 transition-colors"
+        <el-button
+          :icon="colorMode.value === 'dark' ? IconsMoon : IconsSunny"
           :title="`切换主题（当前：${themeLabel}）`"
+          text
           @click="toggleTheme"
         >
-          <AppIcon :name="colorMode.value === 'dark' ? 'moon' : 'sun'" size="xs" :icon-color="colorMode.value === 'dark' ? 'rgb(251 191 36)' : 'rgb(253 224 71)'" />
           <span class="text-xs font-medium">{{ themeLabel }}</span>
-        </button>
+        </el-button>
       </header>
 
       <div class="w-full flex-1 overflow-hidden flex flex-col min-w-0">
@@ -94,7 +98,9 @@
         :class="{ 'text-amber-400': route.path.startsWith('/dev') }"
         @click="mobileDrawerOpen = false"
       >
-        <AppIcon name="code-2" size="sm" :icon-color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''" />
+        <el-icon :size="16" :color="route.path.startsWith('/dev') ? 'rgb(251 191 36)' : ''">
+          <IconsDocument />
+        </el-icon>
         <span class="text-[10px] font-medium">开发</span>
       </NuxtLink>
 
@@ -103,7 +109,10 @@
         :class="{ 'text-zinc-200 bg-white/5': mobileDrawerOpen }"
         @click="mobileDrawerOpen = !mobileDrawerOpen"
       >
-        <AppIcon :name="mobileDrawerOpen ? 'x' : 'menu'" size="sm" />
+        <el-icon :size="16">
+          <IconsClose v-if="mobileDrawerOpen" />
+          <IconsMenu v-else />
+        </el-icon>
         <span class="text-[10px] font-medium">{{ mobileDrawerOpen ? '关闭' : '菜单' }}</span>
       </button>
 
@@ -113,7 +122,9 @@
         :class="{ 'text-amber-400': route.path.startsWith('/docs') }"
         @click="mobileDrawerOpen = false"
       >
-        <AppIcon name="file-text" size="sm" :icon-color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''" />
+        <el-icon :size="16" :color="route.path.startsWith('/docs') ? 'rgb(251 191 36)' : ''">
+          <IconsDocument />
+        </el-icon>
         <span class="text-[10px] font-medium">文档</span>
       </NuxtLink>
     </nav>
@@ -142,13 +153,9 @@
               <p class="text-xs text-zinc-500 leading-tight">Workspace</p>
             </div>
           </div>
-          <AppIcon
-            name="x"
-            size="sm"
-            variant="subtle"
-            clickable
-            @click="mobileDrawerOpen = false"
-          />
+          <el-icon :size="16" class="cursor-pointer" @click="mobileDrawerOpen = false">
+            <IconsClose />
+          </el-icon>
         </div>
 
         <div class="flex-1 overflow-y-auto p-3">
@@ -163,9 +170,17 @@
 </template>
 
 <script setup lang="ts">
-import AppIcon from '~/components/base/AppIcon.vue'
+import * as Icons from '@element-plus/icons-vue'
 import DevSidebar from '~/components/layout/DevSidebar.vue'
 import DocsSidebar from '~/components/layout/DocsSidebar.vue'
+
+const IconsMoon = Icons.Moon
+const IconsSunny = Icons.Sunny
+const IconsDocument = Icons.DocumentCopy
+const IconsArrowLeft = Icons.ArrowLeft
+const IconsArrowRight = Icons.ArrowRight
+const IconsClose = Icons.Close
+const IconsMenu = Icons.Menu
 
 const route = useRoute()
 const colorMode = useColorMode()

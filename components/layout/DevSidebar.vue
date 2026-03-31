@@ -3,13 +3,13 @@
   <aside class="h-full flex flex-col">
     <div class="flex items-center justify-between gap-3 p-4 border-b border-white/5">
       <div class="flex items-center gap-3 min-w-0 flex-1">
-        <AppIcon name="folder-git-2" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
+        <Icon name="folder-git-2" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
         <div class="min-w-0 flex-1">
           <h2 class="text-sm font-semibold text-zinc-100 leading-tight">GitHub 项目</h2>
           <p class="text-xs text-zinc-500 leading-tight">{{ projects.length }} 个仓库</p>
         </div>
       </div>
-      <AppIcon
+      <Icon
         name="refresh-cw"
         size="sm"
         variant="subtle"
@@ -54,7 +54,7 @@
           </span>
         </div>
 
-        <AppIcon
+        <Icon
           :name="cloning === project.full_name ? 'loader-2' : (project.localExists ? 'download' : 'plus')"
           size="sm"
           variant="subtle"
@@ -68,7 +68,7 @@
 
       <div v-if="projects.length === 0 && !loading" class="flex flex-col items-center gap-4 p-8 text-center">
         <div class="w-12 h-12 flex-center rounded-xl bg-zinc-800/50 border border-white/5">
-          <AppIcon name="folder-open" size="lg" icon-color="rgb(82 82 83)" />
+          <Icon name="folder-open" size="lg" icon-color="rgb(82 82 83)" />
         </div>
         <div class="space-y-1">
           <p class="text-sm font-medium text-zinc-400">暂无仓库</p>
@@ -78,7 +78,7 @@
 
       <div v-if="loading && projects.length === 0" class="flex flex-col items-center gap-4 p-8 text-center">
         <div class="w-12 h-12 flex-center rounded-xl bg-zinc-800/50 border border-white/5">
-          <AppIcon name="loader-2" size="lg" icon-color="rgb(251 191 36)" />
+          <Icon name="loader-2" size="lg" icon-color="rgb(251 191 36)" />
         </div>
         <p class="text-sm text-zinc-500">加载中...</p>
       </div>
@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import AppIcon from '~/components/base/AppIcon.vue'
+import * as Icons from '@element-plus/icons-vue'
 
 interface Project {
   id: number
