@@ -1,10 +1,10 @@
 // server/api/openclaw/chat.post.ts
-export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
+import { config as dbConfig } from '~/server/utils/config'
 
-  const gatewayUrl = config.openclawGatewayUrl || 'http://127.0.0.1:18789'
-  const gatewayToken = config.openclawGatewayToken || ''
-  const agentId = config.openclawAgentId || 'main'
+export default defineEventHandler(async (event) => {
+  const gatewayUrl = await dbConfig.openclaw.getGatewayUrl()
+  const gatewayToken = await dbConfig.openclaw.getGatewayToken()
+  const agentId = await dbConfig.openclaw.getAgentId()
 
   try {
     const body = await readBody(event)

@@ -214,6 +214,35 @@ const categoryFields: Record<string, SettingField[]> = {
       defaultValue: 'https://api.openclaw.dev'
     },
     {
+      key: 'OPENCLAW_GATEWAY_URL',
+      label: 'Gateway URL',
+      type: 'text',
+      description: 'OpenClaw Gateway 服务器地址',
+      defaultValue: 'http://127.0.0.1:18789'
+    },
+    {
+      key: 'OPENCLAW_GATEWAY_TOKEN',
+      label: 'Gateway Token',
+      type: 'password',
+      description: 'OpenClaw Gateway 访问令牌',
+      isSensitive: true,
+      defaultValue: ''
+    },
+    {
+      key: 'OPENCLAW_AGENT_ID',
+      label: 'Agent ID',
+      type: 'text',
+      description: 'OpenClaw Agent 标识符',
+      defaultValue: 'main'
+    },
+    {
+      key: 'CHAT_DATA_DIR',
+      label: 'Chat Data Directory',
+      type: 'text',
+      description: '聊天数据存储目录',
+      defaultValue: '/data/openclaw-chat'
+    },
+    {
       key: 'OPENCLAW_TIMEOUT',
       label: '请求超时',
       type: 'number',

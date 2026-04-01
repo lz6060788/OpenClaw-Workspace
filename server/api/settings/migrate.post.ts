@@ -31,8 +31,8 @@ const migrationConfig = {
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event)
-    const { categories = Object.keys(migrationConfig), dryRun = false } = body
+    const body = await readBody(event).catch(() => ({}))
+    const { categories = Object.keys(migrationConfig), dryRun = false } = body || {}
 
     const results = {
       migrated: 0,

@@ -2,8 +2,10 @@
 /**
  * 获取所有聊天会话列表
  */
+import { config } from '~/server/utils/config'
+
 export default defineEventHandler(async (event) => {
-  const dataDir = useRuntimeConfig().chatDataDir || '/tmp/openclaw-chat-data'
+  const dataDir = await config.openclaw.getChatDataDir()
 
   try {
     // 确保目录存在

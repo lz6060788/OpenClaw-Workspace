@@ -2,6 +2,8 @@
 /**
  * 保存消息到指定项目的聊天会话
  */
+import { config } from '~/server/utils/config'
+
 export default defineEventHandler(async (event) => {
   const projectId = getRouterParam(event, 'projectId')
   if (!projectId) {
@@ -21,7 +23,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const dataDir = useRuntimeConfig().chatDataDir || '/tmp/openclaw-chat-data'
+  const dataDir = await config.openclaw.getChatDataDir()
   const sessionFile = `${dataDir}/${projectId}.json`
 
   try {
