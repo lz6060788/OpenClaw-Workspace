@@ -134,6 +134,94 @@ export const db = {
       take: limit,
     }),
   },
+
+  // Setting operations
+  setting: {
+    // Find all settings by category
+    findByCategory: (category: string) => prisma.setting.findMany({
+      where: { category },
+    }),
+
+    // Find setting by key
+    findByKey: (key: string) => prisma.setting.findUnique({
+      where: { key },
+    }),
+
+    // Find multiple settings by keys
+    findByKeys: (keys: string[]) => prisma.setting.findMany({
+      where: { key: { in: keys } },
+    }),
+
+    // Create or update setting
+    upsert: (key: string, data: {
+      value: string
+      type: string
+      category: string
+      description?: string | null
+      isSensitive?: boolean
+      isEncrypted?: boolean
+      defaultValue?: string | null
+    }) => prisma.setting.upsert({
+      where: { key },
+      update: data,
+      create: { key, ...data },
+    }),
+
+    // Batch upsert settings
+    batchUpsert: (settings: Array<{
+      key: string
+      value: string
+      type: string
+      category: string
+      description?: string | null
+      isSensitive?: boolean
+      isEncrypted?: boolean
+      defaultValue?: string | null
+    }>) => Promise.all(
+      settings.map(setting =>
+        prisma.setting.upsert({
+          where: { key: setting.key },
+          update: {
+            value: setting.value,
+            type: setting.type,
+            category: setting.category,
+            description: setting.description,
+            isSensitive: setting.isSensitive ?? false,
+            isEncrypted: setting.isEncrypted ?? false,
+            defaultValue: setting.defaultValue,
+          },
+          create: {
+            key: setting.key,
+            value: setting.value,
+            type: setting.type,
+            category: setting.category,
+            description: setting.description,
+            isSensitive: setting.isSensitive ?? false,
+            isEncrypted: setting.isEncrypted ?? false,
+            defaultValue: setting.defaultValue,
+          },
+        })
+      )
+    ),
+
+    // Delete setting by key
+    delete: (key: string) => prisma.setting.delete({
+      where: { key },
+    }),
+
+    // Find all settings with optional filters
+    findAll: (filters?: {
+      category?: string
+      type?: string
+      isSensitive?: boolean
+    }) => prisma.setting.findMany({
+      where: filters ? {
+        ...(filters.category && { category: filters.category }),
+        ...(filters.type && { type: filters.type }),
+        ...(filters.isSensitive !== undefined && { isSensitive: filters.isSensitive }),
+      } : undefined,
+    }),
+  },
 }
 
 export default prisma

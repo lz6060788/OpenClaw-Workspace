@@ -2,6 +2,7 @@
 import { readdir, readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { execSync } from 'child_process'
+import { config } from '~/server/utils/config'
 
 const PROJECTS_DIR = join(process.cwd(), 'github-projects')
 const CACHE_FILE = join(process.cwd(), '.cache', 'github-repos.json')
@@ -34,10 +35,11 @@ async function ensureDir(path: string) {
 
 // 获取 GitHub API 数据
 async function fetchGitHubRepos(): Promise<RepoInfo[]> {
-  const token = process.env.GITHUB_TOKEN
-  
+  // Try to get token from database first
+  const token = await config.github.getToken() || process.env.GITHUB_TOKEN
+
   if (!token) {
-    throw new Error('GITHUB_TOKEN environment variable is required')
+    throw new Error('GITHUB_TOKEN is not configured in database or environment')
   }
   
   const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100&affiliation=owner', {

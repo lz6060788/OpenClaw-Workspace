@@ -37,6 +37,18 @@
           </el-icon>
           <span class="text-[10px] font-medium">文档</span>
         </NuxtLink>
+        <NuxtLink
+          to="/settings"
+          class="group flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all duration-200"
+          :class="route.path.startsWith('/settings')
+            ? 'bg-amber-500/10 text-amber-400'
+            : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'"
+        >
+          <el-icon :size="16" :color="route.path.startsWith('/settings') ? 'rgb(251 191 36)' : ''">
+            <IconsSetting />
+          </el-icon>
+          <span class="text-[10px] font-medium">设置</span>
+        </NuxtLink>
       </nav>
 
       <el-icon
@@ -59,6 +71,11 @@
       <DevSidebar v-if="route.path.startsWith('/dev')" />
       <!-- Docs 侧边栏 -->
       <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
+      <!-- Settings 侧边栏 -->
+      <div v-else-if="route.path.startsWith('/settings')" class="p-4">
+        <h2 class="text-sm font-semibold text-zinc-100">系统设置</h2>
+        <p class="text-xs text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
+      </div>
     </aside>
 
     <!-- 主区域 -->
@@ -127,6 +144,18 @@
         </el-icon>
         <span class="text-[10px] font-medium">文档</span>
       </NuxtLink>
+
+      <NuxtLink
+        to="/settings"
+        class="flex-1 flex flex-col items-center gap-1 p-2 text-zinc-500 active:text-amber-400 transition-colors"
+        :class="{ 'text-amber-400': route.path.startsWith('/settings') }"
+        @click="mobileDrawerOpen = false"
+      >
+        <el-icon :size="16" :color="route.path.startsWith('/settings') ? 'rgb(251 191 36)' : ''">
+          <IconsSetting />
+        </el-icon>
+        <span class="text-[10px] font-medium">设置</span>
+      </NuxtLink>
     </nav>
 
     <!-- 移动端抽屉遮罩 -->
@@ -163,6 +192,11 @@
           <DevSidebar v-if="route.path.startsWith('/dev')" />
           <!-- Docs 侧边栏 -->
           <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
+          <!-- Settings 占位 -->
+          <div v-else-if="route.path.startsWith('/settings')" class="p-4">
+            <h2 class="text-sm font-semibold text-zinc-100">系统设置</h2>
+            <p class="text-xs text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
+          </div>
         </div>
       </aside>
     </Teleport>
@@ -177,6 +211,7 @@ import DocsSidebar from '~/components/layout/DocsSidebar.vue'
 const IconsMoon = Icons.Moon
 const IconsSunny = Icons.Sunny
 const IconsDocument = Icons.DocumentCopy
+const IconsSetting = Icons.Setting
 const IconsArrowLeft = Icons.ArrowLeft
 const IconsArrowRight = Icons.ArrowRight
 const IconsClose = Icons.Close
@@ -190,6 +225,7 @@ const mobileDrawerOpen = ref(false)
 const pageTitle = computed(() => {
   if (route.path.startsWith('/docs')) return '文档中心'
   if (route.path.startsWith('/dev')) return '开发工作台'
+  if (route.path.startsWith('/settings')) return '系统设置'
   return '工作区'
 })
 

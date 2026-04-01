@@ -6,6 +6,7 @@
 
 import { createHmac, timingSafeEqual } from 'crypto'
 import { db } from '~/server/utils/db'
+import { config } from '~/server/utils/config'
 import { H3Event } from 'h3'
 
 interface VercelWebhookPayload {
@@ -29,7 +30,7 @@ interface VercelWebhookPayload {
 export default defineEventHandler(async (event: H3Event) => {
   try {
     // Verify webhook secret if configured
-    const webhookSecret = process.env.VERCEL_WEBHOOK_SECRET
+    const webhookSecret = await config.vercel.getWebhookSecret() || process.env.VERCEL_WEBHOOK_SECRET
     if (webhookSecret) {
       const signature = getHeader(event, 'x-vercel-signature')
       if (!signature) {

@@ -130,6 +130,17 @@
       </div>
     </div>
 
+    <!-- Settings Button -->
+    <div class="p-3 border-t border-white/5">
+      <NuxtLink
+        to="/settings"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-white/5 text-zinc-400 hover:text-zinc-200"
+      >
+        <Icon name="settings" size="sm" icon-color="rgb(115 115 115)" />
+        <span class="text-sm font-medium">系统设置</span>
+      </NuxtLink>
+    </div>
+
     <!-- Vercel 配置对话框 -->
     <VercelConfigDialog
       v-model="showVercelConfig"

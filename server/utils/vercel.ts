@@ -3,6 +3,8 @@
  * Handles all Vercel API operations for OpenClaw Workspace
  */
 
+import { config } from './config'
+
 const VERCEL_API_BASE = 'https://api.vercel.com'
 const VERCEL_API_VERSION = 'v8'
 
@@ -46,17 +48,30 @@ export interface VercelProjectCreateParams {
 }
 
 /**
- * Get Vercel API configuration from environment
+ * Get Vercel API configuration from database or environment
  */
-function getVercelConfig() {
-  const token = process.env.VERCEL_TOKEN
-  const teamId = process.env.VERCEL_TEAM_ID
+async function getVercelConfig() {
+  // Try to get from database first
+  try {
+    const token = await config.vercel.getToken()
+    const teamId = await config.vercel.getTeamId()
 
-  if (!token) {
-    throw new Error('VERCEL_TOKEN environment variable is not set')
+    if (!token) {
+      throw new Error('VERCEL_TOKEN is not configured')
+    }
+
+    return { token, teamId }
+  } catch (error) {
+    // Fallback to environment variables
+    const token = process.env.VERCEL_TOKEN
+    const teamId = process.env.VERCEL_TEAM_ID
+
+    if (!token) {
+      throw new Error('VERCEL_TOKEN is not configured in database or environment')
+    }
+
+    return { token, teamId }
   }
-
-  return { token, teamId }
 }
 
 /**

@@ -68,3 +68,21 @@ model Deployment {
   @@index([projectId])
   @@index([status])
 }
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  type        String   // 'string', 'number', 'boolean', 'json'
+  category    String   // 'openclaw', 'vercel', 'github'
+  description String?
+  isSensitive Boolean  @default(false)
+  isEncrypted Boolean  @default(false)
+  defaultValue String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([key])
+  @@map("settings")
+}

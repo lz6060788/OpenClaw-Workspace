@@ -6,6 +6,7 @@
 
 import { db } from '~/server/utils/db'
 import vercel from '~/server/utils/vercel'
+import { config } from '~/server/utils/config'
 
 interface LinkRequest {
   projectId: number
@@ -44,10 +45,11 @@ export default defineEventHandler(async (event) => {
     const vercelProject = await vercel.getVercelProject(body.vercelProjectId)
 
     // Update project with Vercel configuration
+    const vercelTeamId = await config.vercel.getTeamId()
     const updatedProject = await db.project.update(body.projectId, {
       vercelProjectId: body.vercelProjectId,
       vercelUrl: vercelProject.url || null,
-      vercelTeamId: process.env.VERCEL_TEAM_ID || null,
+      vercelTeamId: vercelTeamId || null,
       framework: vercelProject.framework || null,
       buildCommand: vercelProject.buildCommand || null,
       outputDirectory: vercelProject.outputDirectory || null,
