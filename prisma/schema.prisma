@@ -1,0 +1,70 @@
+// OpenClaw Workspace Database Schema
+// SQLite database for Vercel migration project
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./openclaw.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model GitHubProject {
+  id               Int       @id @default(autoincrement())
+  githubId         Int       @unique
+  name             String
+  fullName         String
+  owner            String
+  description      String?
+  defaultBranch    String
+  isPrivate        Boolean   @default(false)
+
+  // Vercel 配置
+  vercelProjectId  String?   @unique
+  vercelUrl        String?
+  vercelTeamId     String?
+
+  // 构建配置
+  buildCommand     String?   @default("npm run build")
+  outputDirectory  String?   @default("dist")
+  installCommand   String?   @default("npm install")
+  framework        String?   // "vite", "nextjs", "nuxt", etc.
+
+  // 元数据
+  lastSyncAt       DateTime  @default(now())
+  lastDeployAt     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // 关系
+  deployments      Deployment[]
+
+  @@index([owner])
+  @@index([vercelProjectId])
+}
+
+model Deployment {
+  id              Int      @id @default(autoincrement())
+  projectId       Int
+  project         GitHubProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Vercel 部署信息
+  vercelDeployId  String   @unique
+  status          String   // building, ready, error, cancelled
+  url             String?
+  production      Boolean  @default(false)
+
+  // 构建信息
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  completedAt     DateTime?
+  duration        Int?     // 构建时长（秒）
+
+  // 日志和错误
+  buildLogs       String?  // JSON存储
+  errorMessage    String?
+
+  @@index([projectId])
+  @@index([status])
+}

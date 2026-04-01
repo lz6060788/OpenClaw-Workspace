@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  click: []
+  click: [event: MouseEvent]
 }>()
 
 const iconMap: Record<string, any> = {
@@ -77,6 +77,7 @@ const iconMap: Record<string, any> = {
   'heart': Icons.Star,
   'trash': Icons.Delete,
   'edit': Icons.Edit,
+  'command': Icons.Operation,
   'copy': Icons.CopyDocument,
   'download': Icons.Download,
   'upload': Icons.Upload,
@@ -122,9 +123,9 @@ const effectiveColor = computed(() => {
   return props.iconColor || props.color
 })
 
-const handleClick = () => {
+const handleClick = (event: MouseEvent) => {
   if (props.clickable && !props.loading && !props.disabled) {
-    emit('click')
+    emit('click', event)
   }
 }
 </script>

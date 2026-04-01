@@ -54,16 +54,62 @@
           </span>
         </div>
 
-        <Icon
-          :name="cloning === project.full_name ? 'loader-2' : (project.localExists ? 'download' : 'plus')"
-          size="sm"
-          variant="subtle"
-          background="outlined"
-          :class="cloning === project.full_name ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : ''"
-          :loading="cloning === project.full_name"
-          clickable
-          @click.stop="cloneProject(project)"
-        />
+        <!-- 操作按钮组 -->
+        <div class="flex items-center gap-1">
+          <!-- Vercel 配置按钮 -->
+          <Icon
+            v-if="project.localExists"
+            name="cloud"
+            size="xs"
+            variant="subtle"
+            background="outlined"
+            :class="[
+              'opacity-0 group-hover:opacity-100 transition-opacity',
+              project.vercelProjectId ? 'text-emerald-400' : 'text-zinc-500'
+            ]"
+            :title="project.vercelProjectId ? '已链接 Vercel' : '配置 Vercel'"
+            clickable
+            @click.stop="openVercelConfig(project)"
+          />
+
+          <!-- 部署状态指示器 -->
+          <div
+            v-if="project.latestDeploy && ['queued', 'building'].includes(project.latestDeploy.status)"
+            class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20"
+          >
+            <Icon name="loader-2" size="xs" icon-color="rgb(59 130 246)" :loading="true" />
+            <span class="text-xs text-blue-400">{{ getDeployStatusText(project.latestDeploy.status) }}</span>
+          </div>
+
+          <!-- 部署成功指示器 -->
+          <div
+            v-else-if="project.latestDeploy?.status === 'ready'"
+            class="flex items-center gap-1"
+            :title="`最新部署: ${formatTime(project.latestDeploy.completedAt)}`"
+          >
+            <Icon name="check-circle-2" size="xs" icon-color="rgb(52 211 153)" />
+          </div>
+
+          <!-- 部署失败指示器 -->
+          <div
+            v-else-if="project.latestDeploy?.status === 'error'"
+            class="flex items-center gap-1"
+            :title="`部署失败: ${project.latestDeploy.errorMessage || '未知错误'}`"
+          >
+            <Icon name="x-circle" size="xs" icon-color="rgb(239 68 68)" />
+          </div>
+
+          <Icon
+            :name="cloning === project.full_name ? 'loader-2' : (project.localExists ? 'download' : 'plus')"
+            size="sm"
+            variant="subtle"
+            background="outlined"
+            :class="cloning === project.full_name ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : ''"
+            :loading="cloning === project.full_name"
+            clickable
+            @click.stop="cloneProject(project)"
+          />
+        </div>
       </div>
 
       <div v-if="projects.length === 0 && !loading" class="flex flex-col items-center gap-4 p-8 text-center">
@@ -83,12 +129,20 @@
         <p class="text-sm text-zinc-500">加载中...</p>
       </div>
     </div>
+
+    <!-- Vercel 配置对话框 -->
+    <VercelConfigDialog
+      v-model="showVercelConfig"
+      :project="selectedProject"
+      @configured="onVercelConfigured"
+    />
   </aside>
 </template>
 
 <script setup lang="ts">
 import { useProjectStore } from '~/stores/project'
-import * as Icons from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import VercelConfigDialog from '~/components/dev/VercelConfigDialog.vue'
 
 interface Project {
   id: number
@@ -100,12 +154,21 @@ interface Project {
   branches: string[]
   private: boolean
   localExists: boolean
+  vercelProjectId?: string | null
+  vercelUrl?: string | null
+  latestDeploy?: {
+    status: string
+    completedAt?: Date
+    errorMessage?: string
+  }
 }
 
 const projectStore = useProjectStore()
 const projects = ref<Project[]>([])
 const loading = ref(false)
 const cloning = ref<string | null>(null)
+const showVercelConfig = ref(false)
+const selectedProject = ref<Project | null>(null)
 
 const loadProjects = async (refresh = false) => {
   loading.value = true
@@ -146,11 +209,57 @@ const selectProject = (project: Project) => {
   projectStore.setCurrentProject(project)
 }
 
+const openVercelConfig = (project: Project) => {
+  selectedProject.value = project
+  showVercelConfig.value = true
+}
+
+const onVercelConfigured = (updatedProject: Project) => {
+  // 更新项目列表中的项目
+  const index = projects.value.findIndex(p => p.id === updatedProject.id)
+  if (index !== -1) {
+    projects.value[index] = updatedProject
+  }
+
+  // 如果是当前项目，也更新 store
+  if (projectStore.currentProject?.id === updatedProject.id) {
+    projectStore.setCurrentProject(updatedProject)
+  }
+
+  ElMessage.success('Vercel 配置已更新')
+}
+
 const formatBranches = (branches: string[], defaultBranch: string): string => {
   if (!branches || branches.length === 0) return ''
   const otherCount = branches.length - 1
   if (otherCount <= 0) return defaultBranch
   return `${defaultBranch} +${otherCount}`
+}
+
+const getDeployStatusText = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    queued: '队列中',
+    building: '构建中',
+    ready: '完成',
+    error: '失败',
+    cancelled: '取消',
+    deactivated: '停用'
+  }
+  return statusMap[status] || status
+}
+
+const formatTime = (date?: Date): string => {
+  if (!date) return ''
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 0) return `${days}天前`
+  if (hours > 0) return `${hours}小时前`
+  if (minutes > 0) return `${minutes}分钟前`
+  return '刚刚'
 }
 
 const currentProject = computed(() => projectStore.currentProject)

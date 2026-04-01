@@ -1,0 +1,378 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-03-26",
+  "categories": [
+    {
+      "id": "form-controls",
+      "name": "表单控件",
+      "icon": "sliders",
+      "description": "用于数据输入的表单组件",
+      "components": [
+        {
+          "id": "app-input",
+          "name": "AppInput",
+          "description": "文本输入框",
+          "status": "completed",
+          "props": ["modelValue", "type", "label", "placeholder", "error", "hint", "disabled", "required", "prefixIcon", "suffixIcon"],
+          "events": ["update:modelValue"],
+          "variants": ["text", "password", "email", "number"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-textarea",
+          "name": "AppTextarea",
+          "description": "多行文本输入",
+          "status": "completed",
+          "props": ["modelValue", "label", "placeholder", "error", "hint", "disabled", "required", "size", "rows", "maxLength", "showCharCount", "autoResize"],
+          "events": ["update:modelValue"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["auto-resize", "char-count"]
+        },
+        {
+          "id": "app-select",
+          "name": "AppSelect",
+          "description": "下拉选择框",
+          "status": "completed",
+          "props": ["modelValue", "options", "label", "placeholder", "error", "hint", "disabled", "required", "size", "multiple", "searchable"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["search", "multi-select", "grouping"]
+        },
+        {
+          "id": "app-checkbox",
+          "name": "AppCheckbox",
+          "description": "复选框",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "indeterminate", "size", "value"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["indeterminate", "array-mode"]
+        },
+        {
+          "id": "app-radio",
+          "name": "AppRadio",
+          "description": "单选框",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "size", "value", "name"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-switch",
+          "name": "AppSwitch",
+          "description": "开关",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "size"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-slider",
+          "name": "AppSlider",
+          "description": "滑块",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "required", "size", "min", "max", "step", "showValue", "formatValue", "marks"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["marks", "value-formatting"]
+        },
+        {
+          "id": "app-date-picker",
+          "name": "AppDatePicker",
+          "description": "日期选择器",
+          "status": "completed",
+          "props": ["modelValue", "label", "placeholder", "error", "hint", "disabled", "required", "size", "minDate", "maxDate", "format", "disabledDates"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["min-max-date", "disabled-dates", "custom-format"]
+        },
+        {
+          "id": "app-time-picker",
+          "name": "AppTimePicker",
+          "description": "时间选择器",
+          "status": "completed",
+          "props": ["modelValue", "label", "placeholder", "error", "hint", "disabled", "required", "size", "is24Hour", "format", "minTime", "maxTime", "hourStep", "minuteStep"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["12-24-hour", "time-format"]
+        },
+        {
+          "id": "app-color-picker",
+          "name": "AppColorPicker",
+          "description": "颜色选择器",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "required", "size", "format", "presets"],
+          "events": ["update:modelValue", "change"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["presets", "hex-rgb", "color-conversion"]
+        },
+        {
+          "id": "app-file-upload",
+          "name": "AppFileUpload",
+          "description": "文件上传",
+          "status": "completed",
+          "props": ["modelValue", "label", "error", "hint", "disabled", "size", "multiple", "accept", "maxSize", "maxFiles", "showPreview"],
+          "events": ["update:modelValue", "change", "error"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["drag-drop", "preview", "file-validation"]
+        },
+        {
+          "id": "app-form-field",
+          "name": "AppFormField",
+          "description": "表单字段包装器",
+          "status": "completed",
+          "props": ["label", "labelAction", "description", "error", "hint", "hintIcon", "required", "size"],
+          "slots": ["label", "labelAction", "description", "hint", "default"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-input-group",
+          "name": "AppInputGroup",
+          "description": "表单组",
+          "status": "completed",
+          "props": ["title", "description", "footer", "badge", "required", "size", "compact", "grid"],
+          "slots": ["header", "default", "footer"],
+          "sizes": ["sm", "md", "lg"],
+          "features": ["grid-layout", "compact-mode"]
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "name": "提示反馈",
+      "icon": "alert-circle",
+      "description": "用于展示状态和反馈的组件",
+      "components": [
+        {
+          "id": "app-alert",
+          "name": "AppAlert",
+          "description": "警告提示",
+          "status": "completed",
+          "priority": "high",
+          "props": ["title", "description", "variant", "closable", "size", "duration"],
+          "events": ["close"],
+          "variants": ["info", "success", "warning", "error"]
+        },
+        {
+          "id": "app-toast",
+          "name": "AppToast",
+          "description": "轻提示",
+          "status": "completed",
+          "priority": "high",
+          "props": ["toasts", "position"],
+          "events": ["remove"],
+          "variants": ["info", "success", "warning", "error"]
+        },
+        {
+          "id": "app-modal",
+          "name": "AppModal",
+          "description": "模态框",
+          "status": "completed",
+          "priority": "high",
+          "dependency": "Headless UI Dialog",
+          "props": ["open", "title", "icon", "size", "closable", "maskClosable", "backdropBlur", "fullscreen", "hideHeader", "hideFooter", "okText", "cancelText"],
+          "events": ["update:open", "close", "confirm"],
+          "slots": ["header", "default", "footer"],
+          "sizes": ["sm", "md", "lg", "xl", "full"]
+        },
+        {
+          "id": "app-drawer",
+          "name": "AppDrawer",
+          "description": "抽屉",
+          "status": "completed",
+          "priority": "medium",
+          "dependency": "Headless UI",
+          "props": ["open", "title", "icon", "placement", "size", "closable", "mask", "maskClosable", "hideHeader", "hideFooter"],
+          "events": ["update:open", "close"],
+          "slots": ["header", "default", "footer"],
+          "placements": ["left", "right", "top", "bottom"]
+        },
+        {
+          "id": "app-tooltip",
+          "name": "AppTooltip",
+          "description": "工具提示",
+          "status": "completed",
+          "priority": "medium",
+          "dependency": "Headless UI Popover",
+          "props": ["content", "placement", "variant", "disabled", "delay"],
+          "placements": ["top", "bottom", "left", "right"]
+        },
+        {
+          "id": "app-popover",
+          "name": "AppPopover",
+          "description": "弹出框",
+          "status": "completed",
+          "priority": "medium",
+          "dependency": "Headless UI Popover",
+          "props": ["triggerText", "title", "footer", "placement", "size", "closable", "disabled"],
+          "placements": ["top", "bottom", "left", "right"]
+        },
+        {
+          "id": "app-progress",
+          "name": "AppProgress",
+          "description": "进度条",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["percent", "variant", "status", "size", "showInfo", "inlineInfo", "text", "strokeWidth"],
+          "variants": ["line", "circle", "dashboard"]
+        },
+        {
+          "id": "app-spinner",
+          "name": "AppSpinner",
+          "description": "加载指示器",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["variant", "size", "text"],
+          "variants": ["default", "dots", "bars", "pulse"]
+        }
+      ]
+    },
+    {
+      "id": "base",
+      "name": "基础组件",
+      "icon": "box",
+      "description": "通用的基础组件",
+      "components": [
+        {
+          "id": "app-button",
+          "name": "AppButton",
+          "description": "按钮",
+          "status": "completed",
+          "props": ["variant", "size", "icon", "iconRight", "disabled", "loading", "fullWidth"],
+          "events": ["click"],
+          "variants": ["primary", "secondary", "ghost", "danger"],
+          "sizes": ["xs", "sm", "md", "lg"]
+        },
+        {
+          "id": "app-card",
+          "name": "AppCard",
+          "description": "卡片",
+          "status": "completed",
+          "props": ["title", "subtitle", "hoverable"],
+          "slots": ["header", "default", "footer"]
+        },
+        {
+          "id": "app-icon",
+          "name": "AppIcon",
+          "description": "图标",
+          "status": "completed",
+          "props": ["name", "size", "color", "variant", "background"],
+          "sizes": ["xs", "sm", "md", "lg", "xl"]
+        }
+      ]
+    },
+    {
+      "id": "data-display",
+      "name": "数据展示",
+      "icon": "table",
+      "description": "用于展示数据的组件",
+      "components": [
+        {
+          "id": "app-table",
+          "name": "AppTable",
+          "description": "表格",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["columns", "dataSource", "selectable", "bordered", "striped", "hoverable", "size", "pagination"],
+          "events": ["rowClick", "selectionChange", "sortChange", "pageChange"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-badge",
+          "name": "AppBadge",
+          "description": "徽章",
+          "status": "completed",
+          "priority": "low",
+          "props": ["count", "maxCount", "dot", "showZero", "size", "variant", "offset"],
+          "variants": ["default", "primary", "success", "warning", "error"]
+        },
+        {
+          "id": "app-avatar",
+          "name": "AppAvatar",
+          "description": "头像",
+          "status": "completed",
+          "priority": "low",
+          "props": ["src", "alt", "text", "size", "shape", "status", "clickable", "coloredPlaceholder"],
+          "events": ["click"],
+          "sizes": ["xs", "sm", "md", "lg", "xl"],
+          "shapes": ["circle", "square"]
+        },
+        {
+          "id": "app-pagination",
+          "name": "AppPagination",
+          "description": "分页",
+          "status": "completed",
+          "priority": "low",
+          "props": ["current", "total", "pageSize", "size", "showTotal", "showSizeChanger", "showQuickJumper", "pageSizeOptions"],
+          "events": ["update:current", "update:pageSize", "change"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-breadcrumb",
+          "name": "AppBreadcrumb",
+          "description": "面包屑",
+          "status": "completed",
+          "priority": "low",
+          "props": ["items", "separator", "separatorIcon", "size"],
+          "events": ["click"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-tabs",
+          "name": "AppTabs",
+          "description": "标签页",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["tabs", "activeKey", "variant", "size"],
+          "events": ["update:activeKey", "change", "tabClick", "tabClose"],
+          "variants": ["line", "card", "segment"],
+          "sizes": ["sm", "md", "lg"]
+        },
+        {
+          "id": "app-dropdown",
+          "name": "AppDropdown",
+          "description": "下拉菜单",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["items", "triggerText", "placement", "size", "disabled", "closeOnClick"],
+          "events": ["select", "click"],
+          "placements": ["bottom", "top", "left", "right"]
+        },
+        {
+          "id": "app-collapse",
+          "name": "AppCollapse",
+          "description": "折叠面板",
+          "status": "completed",
+          "priority": "medium",
+          "props": ["items", "activeKey", "accordion", "bordered", "ghost", "size"],
+          "events": ["update:activeKey", "change", "itemClick"],
+          "sizes": ["sm", "md", "lg"]
+        }
+      ]
+    },
+    {
+      "id": "navigation",
+      "name": "导航",
+      "icon": "navigation",
+      "description": "用于页面导航的组件",
+      "components": []
+    }
+  ],
+  "summary": {
+    "total": 34,
+    "completed": 29,
+    "pending": 5,
+    "byPriority": {
+      "high": 0,
+      "medium": 0,
+      "low": 5
+    },
+    "notes": [
+      "All core components completed with UnoCSS atomic classes",
+      "Accessibility (ARIA) support added to all interactive components",
+      "CSS variables used throughout for theming",
+      "interface Props + withDefaults pattern standardized",
+      "Remaining: AppList, AppTree, AppTag, AppSteps (low priority)"
+    ]
+  }
+}

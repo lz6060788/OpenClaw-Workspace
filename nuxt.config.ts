@@ -124,6 +124,23 @@ export default defineNuxtConfig({
   // 兼容性问题
   compatibilityDate: '2024-11-01',
 
+  // 运行时配置
+  runtimeConfig: {
+    // 服务端私有配置（可通过环境变量覆盖）
+    openclawGatewayUrl: process.env.OPENCLAW_GATEWAY_URL || 'http://127.0.0.1:18789',
+    openclawGatewayToken: process.env.OPENCLAW_GATEWAY_TOKEN || 'beba52cc77f117129790429057dbca23e06d5a337f99dd80',
+    openclawAgentId: process.env.OPENCLAW_AGENT_ID || 'main',
+    chatDataDir: process.env.CHAT_DATA_DIR || '/data/openclaw-chat',
+    // Vercel 配置
+    vercelToken: process.env.VERCEL_TOKEN || '',
+    vercelTeamId: process.env.VERCEL_TEAM_ID || '',
+    vercelWebhookSecret: process.env.VERCEL_WEBHOOK_SECRET || '',
+    // 客户端公开配置
+    public: {
+      openclawApiUrl: '/api/openclaw'
+    }
+  },
+
   // Vite 配置
   vite: {
     server: {
