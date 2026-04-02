@@ -1,53 +1,53 @@
 <!-- pages/settings/index.vue -->
 <template>
-  <div class="h-full flex">
-    <!-- Left Sidebar - Category Navigation -->
-    <aside class="w-64 border-r border-white/5 flex flex-col">
-      <div class="p-4 border-b border-white/5">
-        <h1 class="text-lg font-semibold text-zinc-100">系统设置</h1>
-        <p class="text-xs text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto p-2 space-y-1">
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          @click="currentCategory = category.id"
-          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left"
-          :class="currentCategory === category.id
-            ? 'bg-amber-500/10 text-amber-400'
-            : 'hover:bg-white/5 text-zinc-400 hover:text-zinc-200'"
-        >
-          <Icon
-            :name="category.icon"
-            size="sm"
-            :icon-color="currentCategory === category.id ? 'rgb(251 191 36)' : 'rgb(115 115 115)'"
-          />
-          <div class="flex-1">
-            <span class="text-sm font-medium">{{ category.label }}</span>
-            <p class="text-xs opacity-60 mt-0.5">{{ category.description }}</p>
-          </div>
-        </button>
-      </nav>
-
-      <!-- Import/Export Buttons -->
-      <div class="p-3 border-t border-white/5 space-y-2">
+  <div class="h-full flex flex-col">
+    <!-- Header -->
+    <div class="border-b border-white/5 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold text-zinc-100">系统设置</h1>
+          <p class="text-sm text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
+        </div>
         <el-button
-          class="w-full"
           @click="showImportExport = true"
           :icon="Download"
         >
           导入/导出配置
         </el-button>
       </div>
-    </aside>
 
-    <!-- Right Content Area -->
+      <!-- Tabs -->
+      <el-tabs
+        v-model="currentCategory"
+        class="mt-4"
+        @tab-change="handleTabChange"
+      >
+        <el-tab-pane
+          v-for="category in categories"
+          :key="category.id"
+          :label="category.label"
+          :name="category.id"
+        >
+          <template #label>
+            <div class="flex items-center gap-2">
+              <Icon
+                :name="category.icon"
+                size="sm"
+                icon-color="rgb(115 115 115)"
+              />
+              <span>{{ category.label }}</span>
+            </div>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+
+    <!-- Content Area -->
     <main class="flex-1 overflow-y-auto">
       <div class="max-w-3xl mx-auto p-6">
         <div class="mb-6">
-          <h2 class="text-2xl font-semibold text-zinc-100">
-            {{ currentCategoryData?.label }}
+          <h2 class="text-lg font-semibold text-zinc-100">
+            {{ currentCategoryData?.label }} 配置
           </h2>
           <p class="text-sm text-zinc-500 mt-1">
             {{ currentCategoryData?.description }}
@@ -72,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import Icon from '~/components/Icon.vue'
 import SettingsForm from '~/components/settings/SettingsForm.vue'
@@ -113,6 +114,10 @@ const currentCategoryData = computed(() =>
   categories.find(c => c.id === currentCategory.value)
 )
 
+const handleTabChange = (tabName: string) => {
+  currentCategory.value = tabName
+}
+
 const handleSave = async (data: Record<string, any>) => {
   loading.value = true
   try {
@@ -152,3 +157,31 @@ const handleImported = () => {
   ElMessage.success('配置导入成功')
 }
 </script>
+
+<style scoped>
+:deep(.el-tabs__header) {
+  margin-bottom: 0;
+}
+
+:deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+:deep(.el-tabs__item) {
+  color: rgb(115 115 115);
+  font-size: 14px;
+  padding: 0 20px;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: rgb(228 228 231);
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: rgb(251 191 36);
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: rgb(251 191 36);
+}
+</style>
