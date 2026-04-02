@@ -62,8 +62,9 @@
       </el-icon>
     </aside>
 
-    <!-- 桌面端二级侧边栏 -->
+    <!-- 桌面端二级侧边栏（设置页面不显示） -->
     <aside
+      v-if="!route.path.startsWith('/settings')"
       class="hidden md:flex flex-col bg-zinc-800/30 border-r border-white/5 overflow-hidden transition-all duration-300 backdrop-blur-sm"
       :class="{ 'w-0': sidebarCollapsed, 'w-64': !sidebarCollapsed }"
     >
@@ -71,11 +72,6 @@
       <DevSidebar v-if="route.path.startsWith('/dev')" />
       <!-- Docs 侧边栏 -->
       <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
-      <!-- Settings 侧边栏 -->
-      <div v-else-if="route.path.startsWith('/settings')" class="p-4">
-        <h2 class="text-sm font-semibold text-zinc-100">系统设置</h2>
-        <p class="text-xs text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
-      </div>
     </aside>
 
     <!-- 主区域 -->
@@ -167,8 +163,9 @@
         @click="mobileDrawerOpen = false"
       />
 
-      <!-- 移动端抽屉侧边栏 -->
+      <!-- 移动端抽屉侧边栏（设置页面不显示） -->
       <aside
+        v-if="!route.path.startsWith('/settings')"
         class="md:hidden fixed top-0 left-0 bottom-[calc(56px+env(safe-area-inset-bottom))] w-80 max-w-[90vw] bg-zinc-800/95 backdrop-blur-xl z-[51] overflow-hidden flex flex-col pt-safe-top transition-transform duration-300 ease-out"
         :class="{ 'translate-x-0': mobileDrawerOpen, '-translate-x-full': !mobileDrawerOpen }"
       >
@@ -192,11 +189,6 @@
           <DevSidebar v-if="route.path.startsWith('/dev')" />
           <!-- Docs 侧边栏 -->
           <DocsSidebar v-else-if="route.path.startsWith('/docs')" />
-          <!-- Settings 占位 -->
-          <div v-else-if="route.path.startsWith('/settings')" class="p-4">
-            <h2 class="text-sm font-semibold text-zinc-100">系统设置</h2>
-            <p class="text-xs text-zinc-500 mt-1">配置 OpenClaw Workspace</p>
-          </div>
         </div>
       </aside>
     </Teleport>

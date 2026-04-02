@@ -72,10 +72,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'blank'
-})
-
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import Icon from '~/components/Icon.vue'
