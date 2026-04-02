@@ -13,6 +13,23 @@ export default defineNuxtConfig({
   // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia + Auth
   modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt', '@sidebase/nuxt-auth'],
 
+  // Auth configuration
+  auth: {
+    // Global auth enabled
+    globalAppMiddleware: true,
+    // Enable session-based authentication
+    session: {
+      // Enable session refresh
+      enableRefreshPeriodically: 60000,
+      // Enable session refresh on window focus
+      enableRefreshOnWindowFocus: true,
+    },
+    // Production origin
+    origin: process.env.AUTH_ORIGIN || 'https://dev.theirises.cn',
+    // Base URL for auth endpoints
+    baseURL: '/api/auth',
+  },
+
   // 引入自定义 CSS
   css: ['~/assets/css/main.css'],
 
@@ -143,6 +160,8 @@ export default defineNuxtConfig({
       sessionSecret: process.env.AUTH_SECRET || 'change-me-in-production',
       // Session max age (7 days)
       sessionMaxAge: parseInt(process.env.SESSION_MAX_AGE || '604800', 10),
+      // Origin for production (required by nuxt-auth)
+      origin: process.env.AUTH_ORIGIN || 'https://dev.theirises.cn',
     },
     // 客户端公开配置
     public: {
@@ -151,6 +170,8 @@ export default defineNuxtConfig({
       auth: {
         // Base URL of the auth endpoints
         baseURL: '/api/auth',
+        // Full URL for production
+        origin: process.env.AUTH_ORIGIN || 'https://dev.theirises.cn',
         // Whether to enable credentials (cookies)
         credentials: true,
       }
