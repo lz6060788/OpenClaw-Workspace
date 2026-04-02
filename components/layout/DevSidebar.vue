@@ -167,6 +167,7 @@ interface Project {
   localExists: boolean
   vercelProjectId?: string | null
   vercelUrl?: string | null
+  openclawAgentId?: string | null
   latestDeploy?: {
     status: string
     completedAt?: Date

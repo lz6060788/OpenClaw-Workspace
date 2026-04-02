@@ -17,6 +17,9 @@ export interface Project {
   vercelUrl?: string | null
   vercelTeamId?: string | null
 
+  // OpenClaw 配置
+  openclawAgentId?: string | null
+
   // 构建配置
   buildCommand?: string | null
   outputDirectory?: string | null
@@ -97,6 +100,7 @@ export const useProjectStore = defineStore('project', {
     updateVercelConfig(projectId: number, config: {
       vercelProjectId?: string
       vercelUrl?: string
+      openclawAgentId?: string
       buildCommand?: string
       outputDirectory?: string
       installCommand?: string

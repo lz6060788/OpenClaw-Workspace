@@ -11,6 +11,7 @@ interface ConfigureRequest {
   vercelProjectId?: string
   vercelUrl?: string
   vercelTeamId?: string
+  openclawAgentId?: string
   buildCommand?: string
   outputDirectory?: string
   installCommand?: string
@@ -43,6 +44,7 @@ export default defineEventHandler(async (event) => {
       vercelProjectId?: string | null
       vercelUrl?: string | null
       vercelTeamId?: string | null
+      openclawAgentId?: string | null
       buildCommand?: string | null
       outputDirectory?: string | null
       installCommand?: string | null
@@ -53,6 +55,7 @@ export default defineEventHandler(async (event) => {
     if (body.vercelProjectId !== undefined) updateData.vercelProjectId = body.vercelProjectId || null
     if (body.vercelUrl !== undefined) updateData.vercelUrl = body.vercelUrl || null
     if (body.vercelTeamId !== undefined) updateData.vercelTeamId = body.vercelTeamId || null
+    if (body.openclawAgentId !== undefined) updateData.openclawAgentId = body.openclawAgentId || null
     if (body.buildCommand !== undefined) updateData.buildCommand = body.buildCommand || null
     if (body.outputDirectory !== undefined) updateData.outputDirectory = body.outputDirectory || null
     if (body.installCommand !== undefined) updateData.installCommand = body.installCommand || null

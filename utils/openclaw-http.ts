@@ -13,7 +13,8 @@ export class OpenClawHttpClient {
 
   async sendMessage(
     message: string,
-    onProgress?: (delta: string) => void
+    onProgress?: (delta: string) => void,
+    options?: { projectId?: string | number }
   ): Promise<string> {
     const url = `${this.apiUrl}/chat`
 
@@ -27,7 +28,8 @@ export class OpenClawHttpClient {
           messages: [
             { role: 'user', content: message }
           ],
-          stream: !!onProgress
+          stream: !!onProgress,
+          projectId: options?.projectId
         })
       })
 
@@ -89,25 +91,4 @@ export class OpenClawHttpClient {
     }
   }
 
-  async testConnection(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.apiUrl}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: 'user', content: 'ping' }
-          ],
-          stream: false
-        })
-      })
-
-      return response.ok
-    } catch (error) {
-      console.error('[OpenClaw] Connection test failed:', error)
-      return false
-    }
-  }
 }

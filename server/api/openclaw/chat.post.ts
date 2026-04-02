@@ -1,13 +1,27 @@
 // server/api/openclaw/chat.post.ts
 import { config as dbConfig } from '~/server/utils/config'
+import { db } from '~/server/utils/db'
 
 export default defineEventHandler(async (event) => {
   const gatewayUrl = await dbConfig.openclaw.getGatewayUrl()
   const gatewayToken = await dbConfig.openclaw.getGatewayToken()
-  const agentId = await dbConfig.openclaw.getAgentId()
+  const globalAgentId = await dbConfig.openclaw.getAgentId()
 
   try {
     const body = await readBody(event)
+    const { projectId, messages, stream } = body
+
+    // 按项目解析 Agent ID：项目级覆盖 > 全局配置
+    let agentId = globalAgentId
+    if (projectId) {
+      const project = await db.project.findById(Number(projectId))
+      if (project?.openclawAgentId) {
+        agentId = project.openclawAgentId
+      }
+    }
+
+    // 使用 projectId 作为 user 字段实现会话隔离
+    const user = projectId ? String(projectId) : 'workspace'
 
     const response = await $fetch.raw(`${gatewayUrl}/v1/chat/completions`, {
       method: 'POST',
@@ -18,15 +32,15 @@ export default defineEventHandler(async (event) => {
       },
       body: {
         model: `openclaw:${agentId}`,
-        messages: body.messages || [],
-        stream: body.stream || false,
-        user: 'workspace'
+        messages: messages || [],
+        stream: stream || false,
+        user
       },
-      responseType: body.stream ? 'stream' : 'json'
+      responseType: stream ? 'stream' : 'json'
     })
 
     // 如果是流式响应，直接转发
-    if (body.stream) {
+    if (stream) {
       setHeader(event, 'Content-Type', 'text/event-stream')
       setHeader(event, 'Cache-Control', 'no-cache')
       setHeader(event, 'Connection', 'keep-alive')

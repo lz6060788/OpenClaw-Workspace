@@ -164,11 +164,20 @@ export default defineEventHandler(async (event) => {
     }
   }
   
-  // 检查本地是否存在
+  // 检查本地是否存在，并从数据库获取 openclawAgentId
   const projectsDir = await getProjectsDir()
-  const results = await Promise.all(repos.map(async repo => ({
-    ...repo,
-    localExists: await checkLocalExists(repo.full_name, projectsDir)
-  })))
+  const results = await Promise.all(repos.map(async repo => {
+    let openclawAgentId: string | null = null
+    try {
+      const dbProject = await db.project.findByGithubId(repo.id)
+      openclawAgentId = dbProject?.openclawAgentId || null
+    } catch {}
+
+    return {
+      ...repo,
+      localExists: await checkLocalExists(repo.full_name, projectsDir),
+      openclawAgentId
+    }
+  }))
   return results
 })

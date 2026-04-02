@@ -76,6 +76,7 @@ export const db = {
       vercelProjectId?: string | null
       vercelUrl?: string | null
       vercelTeamId?: string | null
+      openclawAgentId?: string | null
       buildCommand?: string | null
       outputDirectory?: string | null
       installCommand?: string | null

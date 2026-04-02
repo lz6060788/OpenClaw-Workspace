@@ -25,6 +25,9 @@ model GitHubProject {
   vercelUrl        String?
   vercelTeamId     String?
 
+  // OpenClaw 配置
+  openclawAgentId  String?   // 项目级 Agent ID，null 则使用全局配置
+
   // 构建配置
   buildCommand     String?   @default("npm run build")
   outputDirectory  String?   @default("dist")

@@ -2,7 +2,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="`配置 Vercel: ${project?.name || ''}`"
+    :title="`项目配置: ${project?.name || ''}`"
     width="600px"
     append-to-body
     @close="handleClose"
@@ -128,6 +128,26 @@
         </div>
       </el-tab-pane>
 
+      <!-- OpenClaw 配置 -->
+      <el-tab-pane label="OpenClaw" name="openclaw">
+        <div class="space-y-4">
+          <el-form-item label="Agent ID">
+            <el-input
+              v-model="form.openclawAgentId"
+              placeholder="留空则使用全局默认 Agent"
+            />
+            <template #footer>
+              <div class="text-xs text-zinc-500">指定该项目使用的 OpenClaw Agent。留空使用全局配置中的 Agent ID。</div>
+            </template>
+          </el-form-item>
+
+          <div class="px-4 py-3 bg-zinc-800/50 rounded-xl border border-white/5 text-sm text-zinc-400 space-y-1">
+            <p>每个项目自动使用独立的对话会话（通过项目 ID 隔离）。</p>
+            <p>如需使用不同的 Agent（如不同的角色或配置），在此处指定 Agent ID。</p>
+          </div>
+        </div>
+      </el-tab-pane>
+
       <!-- 部署历史 -->
       <el-tab-pane label="部署历史" name="history">
         <div v-if="loadingDeployments" class="flex-center py-8">
@@ -198,6 +218,7 @@ interface Project {
   name: string
   vercelProjectId?: string | null
   vercelUrl?: string | null
+  openclawAgentId?: string | null
   buildCommand?: string | null
   outputDirectory?: string | null
   installCommand?: string | null
@@ -252,6 +273,7 @@ const deployments = ref<Deployment[]>([])
 const form = reactive({
   vercelProjectId: '',
   vercelUrl: '',
+  openclawAgentId: '',
   buildCommand: '',
   outputDirectory: '',
   installCommand: '',
@@ -464,6 +486,7 @@ watch(visible, (val) => {
     // 初始化表单数据
     form.vercelProjectId = props.project.vercelProjectId || ''
     form.vercelUrl = props.project.vercelUrl || ''
+    form.openclawAgentId = props.project.openclawAgentId || ''
     form.buildCommand = props.project.buildCommand || ''
     form.outputDirectory = props.project.outputDirectory || ''
     form.installCommand = props.project.installCommand || ''

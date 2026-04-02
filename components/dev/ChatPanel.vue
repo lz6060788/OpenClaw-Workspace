@@ -4,14 +4,7 @@
     <!-- 顶部标题栏 -->
     <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/5 bg-zinc-800/30 backdrop-blur-sm min-h-[56px]">
       <div class="flex items-center gap-3 min-w-0 flex-1">
-        <div class="relative">
-          <Icon name="message-square" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
-          <div
-            class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-zinc-800 transition-colors"
-            :class="statusColor"
-            :title="`OpenClaw 网关: ${connectionStatus}`"
-          />
-        </div>
+        <Icon name="message-square" size="md" variant="subtle" background="tinted" icon-color="rgb(251 191 36)" />
         <div class="flex items-center gap-1.5 min-w-0">
           <span class="text-sm text-zinc-500 hidden md:inline">GitHub 项目</span>
           <Icon name="chevron-right" size="xs" icon-color="rgb(63 63 70)" />
@@ -181,7 +174,6 @@ const messages = computed(() => {
 
 const input = ref('')
 const isLoading = ref(false)
-const connectionStatus = ref<'disconnected' | 'connecting' | 'connected'>('disconnected')
 const messagesContainer = ref<HTMLElement>()
 
 // OpenClaw 指令列表
@@ -238,32 +230,6 @@ const handleCommand = (command: string) => {
 // 是否禁用聊天功能（未选择项目时）
 const isChatDisabled = computed(() => !currentProject.value)
 
-// 测试连接
-const testConnection = async () => {
-  try {
-    const connected = await $openclaw.testConnection()
-    connectionStatus.value = connected ? 'connected' : 'disconnected'
-  } catch (error) {
-    connectionStatus.value = 'disconnected'
-  }
-}
-
-// 定期检查连接状态
-let statusCheckInterval: NodeJS.Timeout | null = null
-
-onMounted(() => {
-  testConnection()
-  statusCheckInterval = setInterval(() => {
-    testConnection()
-  }, 10000) // 每 10 秒检查一次
-})
-
-onUnmounted(() => {
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-  }
-})
-
 const sendMessage = async () => {
   if (!currentProject.value || !input.value.trim() || isLoading.value) return
 
@@ -304,7 +270,8 @@ const sendMessage = async () => {
             lastMessage.content += delta
           }
         }
-      }
+      },
+      { projectId }
     )
   } catch (error: any) {
     console.error('[ChatPanel] Send error:', error)
@@ -338,17 +305,6 @@ watch(() => currentProject.value?.id, () => {
   })
 })
 
-// 连接状态指示器颜色
-const statusColor = computed(() => {
-  switch (connectionStatus.value) {
-    case 'connected':
-      return 'bg-green-500'
-    case 'connecting':
-      return 'bg-yellow-500'
-    default:
-      return 'bg-red-500'
-  }
-})
 </script>
 
 <style scoped>
