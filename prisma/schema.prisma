@@ -74,7 +74,7 @@ model Setting {
   key         String   @unique
   value       String
   type        String   // 'string', 'number', 'boolean', 'json'
-  category    String   // 'openclaw', 'vercel', 'github'
+  category    String   // 'openclaw', 'vercel', 'github', 'system'
   description String?
   isSensitive Boolean  @default(false)
   isEncrypted Boolean  @default(false)
@@ -85,4 +85,31 @@ model Setting {
   @@index([category])
   @@index([key])
   @@map("settings")
+}
+
+// User model for authentication
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // bcrypt hash
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+
+  @@map("users")
+}
+
+// Session model for authentication
+model Session {
+  id        String   @id @default(cuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
 }

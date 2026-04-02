@@ -10,8 +10,8 @@ export default defineNuxtConfig({
   // 禁用 SSR，使用 SPA 模式
   ssr: false,
 
-  // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia
-  modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt'],
+  // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia + Auth
+  modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt', '@sidebase/nuxt-auth'],
 
   // 引入自定义 CSS
   css: ['~/assets/css/main.css'],
@@ -137,10 +137,37 @@ export default defineNuxtConfig({
     vercelToken: process.env.VERCEL_TOKEN || '',
     vercelTeamId: process.env.VERCEL_TEAM_ID || '',
     vercelWebhookSecret: process.env.VERCEL_WEBHOOK_SECRET || '',
+    // 认证配置
+    auth: {
+      // Session secret (使用环境变量)
+      sessionSecret: process.env.AUTH_SECRET || 'change-me-in-production',
+      // Session max age (7 days)
+      sessionMaxAge: parseInt(process.env.SESSION_MAX_AGE || '604800', 10),
+    },
     // 客户端公开配置
     public: {
-      openclawApiUrl: '/api/openclaw'
+      openclawApiUrl: '/api/openclaw',
+      // Auth public config
+      auth: {
+        // Base URL of the auth endpoints
+        baseURL: '/api/auth',
+        // Whether to enable credentials (cookies)
+        credentials: true,
+      }
     }
+  },
+
+  // Auth configuration
+  auth: {
+    // Global auth enabled
+    globalAppMiddleware: true,
+    // Enable session-based authentication
+    session: {
+      // Enable session refresh
+      enableRefreshPeriodically: 60000,
+      // Enable session refresh on window focus
+      enableRefreshOnWindowFocus: true,
+    },
   },
 
   // Vite 配置

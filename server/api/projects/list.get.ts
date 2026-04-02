@@ -3,8 +3,14 @@ import { readdir, readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { execSync } from 'child_process'
 import { config } from '~/server/utils/config'
+import { db } from '~/server/utils/db'
 
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+// Get GitHub projects path from database
+async function getProjectsDir() {
+  const pathSetting = await db.setting.findByKey('GITHUB_PROJECTS_PATH')
+  return pathSetting?.value || join(process.cwd(), 'github-projects')
+}
+
 const CACHE_FILE = join(process.cwd(), '.cache', 'github-repos.json')
 const CACHE_TTL = 10 * 60 * 1000 // 10 分钟缓存
 
@@ -113,8 +119,8 @@ async function setCache(data: CacheData): Promise<void> {
 }
 
 // 检查本地是否存在
-function checkLocalExists(fullName: string): boolean {
-  const localPath = join(PROJECTS_DIR, fullName)
+async function checkLocalExists(fullName: string, projectsDir: string): Promise<boolean> {
+  const localPath = join(projectsDir, fullName)
   try {
     execSync(`git -C "${localPath}" rev-parse --git-dir`, { stdio: 'ignore' })
     return true
@@ -126,7 +132,10 @@ function checkLocalExists(fullName: string): boolean {
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const forceRefresh = query.refresh === 'true'
-  
+
+  // Get projects directory from database
+  const PROJECTS_DIR = await getProjectsDir()
+
   // 确保项目目录存在
   try {
     await ensureDir(PROJECTS_DIR)
@@ -156,8 +165,10 @@ export default defineEventHandler(async (event) => {
   }
   
   // 检查本地是否存在
-  return repos.map(repo => ({
+  const projectsDir = await getProjectsDir()
+  const results = await Promise.all(repos.map(async repo => ({
     ...repo,
-    localExists: checkLocalExists(repo.full_name)
-  }))
+    localExists: await checkLocalExists(repo.full_name, projectsDir)
+  })))
+  return results
 })

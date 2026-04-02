@@ -200,17 +200,37 @@ const refreshProjects = () => {
 const cloneProject = async (project: Project) => {
   cloning.value = project.full_name
   try {
-    await $fetch('/api/projects/clone', {
+    const response = await $fetch('/api/projects/clone', {
       method: 'POST',
       body: {
         fullName: project.full_name,
         owner: project.owner,
         name: project.name
       }
-    })
-    await loadProjects()
+    }) as any
+
+    if (response.success) {
+      ElMessage.success(response.message || '操作成功')
+      await loadProjects()
+    }
   } catch (error: any) {
-    alert(error.message || '操作失败')
+    const message = error.data?.message || error.message || '操作失败'
+
+    // Check if error is about missing path configuration
+    if (message.includes('未配置') || message.includes('not configured')) {
+      ElMessage({
+        type: 'warning',
+        message: '请先在系统设置中配置 GitHub 项目路径',
+        duration: 5000,
+        showClose: true
+      })
+      // Optionally redirect to settings page
+      setTimeout(() => {
+        navigateTo('/settings?tab=system')
+      }, 2000)
+    } else {
+      ElMessage.error(message)
+    }
   } finally {
     cloning.value = null
   }

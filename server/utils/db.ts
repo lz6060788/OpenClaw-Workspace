@@ -227,6 +227,84 @@ export const db = {
       } : undefined,
     }),
   },
+
+  // User operations
+  user: {
+    // Find user by ID
+    findById: (id: number) => prisma.user.findUnique({
+      where: { id },
+    }),
+
+    // Find user by username
+    findByUsername: (username: string) => prisma.user.findUnique({
+      where: { username },
+    }),
+
+    // Create user
+    create: (data: {
+      username: string
+      password: string
+    }) => prisma.user.create({
+      data,
+    }),
+
+    // Update user
+    update: (id: number, data: {
+      password?: string
+    }) => prisma.user.update({
+      where: { id },
+      data,
+    }),
+
+    // Delete user
+    delete: (id: number) => prisma.user.delete({
+      where: { id },
+    }),
+  },
+
+  // Session operations
+  session: {
+    // Find session by token
+    findByToken: (token: string) => prisma.session.findUnique({
+      where: { token },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    }),
+
+    // Create session
+    create: (data: {
+      userId: number
+      token: string
+      expiresAt: Date
+    }) => prisma.session.create({
+      data,
+    }),
+
+    // Delete session by token
+    deleteByToken: (token: string) => prisma.session.delete({
+      where: { token },
+    }),
+
+    // Delete all sessions for a user
+    deleteByUserId: (userId: number) => prisma.session.deleteMany({
+      where: { userId },
+    }),
+
+    // Delete expired sessions
+    deleteExpired: () => prisma.session.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
+    }),
+  },
 }
 
 export default prisma

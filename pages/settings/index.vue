@@ -54,7 +54,15 @@
           </p>
         </div>
 
+        <!-- System category: Show password change and GitHub path config -->
+        <template v-if="currentCategory === 'system'">
+          <GitHubPathConfig />
+          <PasswordChange />
+        </template>
+
+        <!-- Other categories: Show settings form -->
         <SettingsForm
+          v-else
           :category="currentCategory"
           :loading="loading"
           @save="handleSave"
@@ -77,6 +85,8 @@ import { Download } from '@element-plus/icons-vue'
 import Icon from '~/components/Icon.vue'
 import SettingsForm from '~/components/settings/SettingsForm.vue'
 import ImportExportDialog from '~/components/settings/ImportExportDialog.vue'
+import PasswordChange from '~/components/settings/PasswordChange.vue'
+import GitHubPathConfig from '~/components/settings/GitHubPathConfig.vue'
 
 interface Category {
   id: string
@@ -103,6 +113,12 @@ const categories: Category[] = [
     label: 'GitHub',
     description: 'GitHub 集成配置',
     icon: 'github'
+  },
+  {
+    id: 'system',
+    label: '系统',
+    description: '系统设置和账户管理',
+    icon: 'user'
   }
 ]
 
