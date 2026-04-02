@@ -160,5 +160,26 @@ export default defineNuxtConfig({
     worker: {
       format: 'es'
     }
+  },
+
+  // Nitro 服务器配置
+  nitro: {
+    experimental: {
+      wasm: true
+    },
+    // 生产环境监听配置
+    // 允许从任何 IP 访问（Traefik 反向代理需要）
+    listen: ['0.0.0.0:3000'],
+    // 设置环境变量
+    experimental: {
+      wasm: true
+    },
+    envPrefix: '',
+    runtimeConfig: {
+      nitro: {
+        // 设置数据库路径
+        DATABASE_URL: 'file:/root/.openclaw/workspace/OpenClaw-Workspace/openclaw.db'
+      }
+    }
   }
 })

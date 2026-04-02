@@ -9,6 +9,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"] || "file:./openclaw.db",
+    url: process.env["DATABASE_URL"] || "file:/root/.openclaw/workspace/OpenClaw-Workspace/openclaw.db",
   },
 });
