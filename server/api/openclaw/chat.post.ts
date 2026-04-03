@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const body = await readBody(event)
-    const { projectId, messages, stream } = body
+    const { projectId, projectName, messages, stream } = body
 
     // 按项目解析 Agent ID：项目级覆盖 > 全局配置
     let agentId = globalAgentId
@@ -20,8 +20,8 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 使用 projectId 作为 user 字段实现会话隔离
-    const user = projectId ? String(projectId) : 'workspace'
+    // 使用项目名称作为 user 字段实现会话隔离
+    const user = projectName || (projectId ? String(projectId) : 'workspace')
 
     const response = await $fetch.raw(`${gatewayUrl}/v1/chat/completions`, {
       method: 'POST',

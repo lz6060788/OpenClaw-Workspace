@@ -271,7 +271,7 @@ const sendMessage = async () => {
           }
         }
       },
-      { projectId }
+      { projectId, projectName: currentProject.value.name }
     )
   } catch (error: any) {
     console.error('[ChatPanel] Send error:', error)

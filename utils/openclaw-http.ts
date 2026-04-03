@@ -14,7 +14,7 @@ export class OpenClawHttpClient {
   async sendMessage(
     message: string,
     onProgress?: (delta: string) => void,
-    options?: { projectId?: string | number }
+    options?: { projectId?: string | number; projectName?: string }
   ): Promise<string> {
     const url = `${this.apiUrl}/chat`
 
@@ -29,7 +29,8 @@ export class OpenClawHttpClient {
             { role: 'user', content: message }
           ],
           stream: !!onProgress,
-          projectId: options?.projectId
+          projectId: options?.projectId,
+          projectName: options?.projectName
         })
       })
 
