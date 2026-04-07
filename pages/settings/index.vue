@@ -54,8 +54,14 @@
           </p>
         </div>
 
-        <!-- System category: Show password change -->
+        <!-- System category: Show encryption key config and password change -->
         <template v-if="currentCategory === 'system'">
+          <SettingsForm
+            :category="currentCategory"
+            :loading="loading"
+            @save="handleSave"
+            @reset="handleReset"
+          />
           <PasswordChange />
         </template>
 

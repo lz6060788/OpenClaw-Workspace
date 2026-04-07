@@ -1,6 +1,6 @@
 // server/utils/config.ts
 import { db } from './db'
-import { decrypt, isEncryptionAvailable } from './encryption'
+import { decrypt, isEncryptionAvailable, initEncryptionKey } from './encryption'
 
 /**
  * Configuration access layer
@@ -52,11 +52,18 @@ export async function getConfig<T = any>(
 
       // Decrypt sensitive values if requested
       if (setting.isEncrypted && decryptSensitive) {
+        // Ensure encryption key is loaded from database
+        await initEncryptionKey()
         if (!isEncryptionAvailable()) {
           console.warn(`Cannot decrypt ${key}: encryption key not available`)
           return defaultValue
         }
-        value = decrypt(setting.value)
+        try {
+          value = decrypt(setting.value)
+        } catch {
+          // Value was stored as plain text despite isEncrypted flag (migration case)
+          value = setting.value
+        }
       }
 
       // Convert value based on type

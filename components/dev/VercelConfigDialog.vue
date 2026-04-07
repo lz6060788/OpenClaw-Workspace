@@ -7,6 +7,7 @@
     append-to-body
     @close="handleClose"
   >
+    <el-form label-width="120px">
     <el-tabs v-model="activeTab" class="w-full">
       <!-- Vercel 项目选择 -->
       <el-tab-pane label="Vercel 项目" name="vercel">
@@ -216,6 +217,7 @@
         </el-timeline>
       </el-tab-pane>
     </el-tabs>
+    </el-form>
 
     <template #footer>
       <div class="flex items-center justify-between">

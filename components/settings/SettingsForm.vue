@@ -400,6 +400,16 @@ const categoryFields: Record<string, SettingField[]> = {
       description: '定期自动同步仓库状态',
       defaultValue: true
     }
+  ],
+  system: [
+    {
+      key: 'ENCRYPTION_KEY',
+      label: '加密密钥',
+      type: 'password',
+      description: '用于保护敏感配置（Token 等）。首次配置后请勿更改，否则已加密的数据将无法解密。',
+      isSensitive: true,
+      defaultValue: ''
+    }
   ]
 }
 

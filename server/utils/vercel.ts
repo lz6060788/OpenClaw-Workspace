@@ -81,7 +81,7 @@ async function vercelFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const { token, teamId } = getVercelConfig()
+  const { token, teamId } = await getVercelConfig()
 
   const url = new URL(`${VERCEL_API_BASE}${endpoint}`)
   if (teamId) {
