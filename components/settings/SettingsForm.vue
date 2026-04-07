@@ -64,6 +64,46 @@
           </div>
         </el-form-item>
 
+        <!-- Async Select Input (loads options from API) -->
+        <el-form-item
+          v-else-if="field.type === 'async-select'"
+          :label="field.label"
+        >
+          <el-select
+            v-model="formData[field.key]"
+            :placeholder="`请选择${field.label}`"
+            class="w-full"
+            :loading="asyncOptions[field.key]?.loading"
+            filterable
+            allow-create
+            default-first-option
+            @change="handleFieldChange(field.key, $event)"
+          >
+            <el-option
+              v-for="option in asyncOptions[field.key]?.data || []"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+          <div v-if="field.description" class="text-xs text-zinc-500 mt-1">
+            {{ field.description }}
+          </div>
+          <div v-if="field.defaultValue" class="text-xs text-zinc-600 mt-0.5">
+            默认值: {{ field.defaultValue }}
+          </div>
+          <el-button
+            text
+            type="primary"
+            size="small"
+            class="mt-1"
+            :loading="asyncOptions[field.key]?.loading"
+            @click="loadAsyncOptions(field)"
+          >
+            刷新列表
+          </el-button>
+        </el-form-item>
+
         <!-- Switch/Boolean Input -->
         <el-form-item
           v-else-if="field.type === 'boolean'"
@@ -169,11 +209,13 @@ import type { FormInstance } from 'element-plus'
 interface SettingField {
   key: string
   label: string
-  type: 'text' | 'password' | 'select' | 'boolean' | 'number' | 'textarea'
+  type: 'text' | 'password' | 'select' | 'boolean' | 'number' | 'textarea' | 'async-select'
   description?: string
   defaultValue?: string | number | boolean
   isSensitive?: boolean
   options?: Array<{ label: string; value: string | number }>
+  /** For async-select: API endpoint to fetch options from */
+  optionsEndpoint?: string
   min?: number
   max?: number
   step?: number
@@ -195,6 +237,35 @@ const formData = ref<Record<string, any>>({})
 const originalData = ref<Record<string, any>>({})
 const showPassword = ref<Record<string, boolean>>({})
 
+// Async options state for fields with optionsEndpoint
+const asyncOptions = ref<Record<string, {
+  loading: boolean
+  data: Array<{ label: string; value: string }>
+}>>({})
+
+// Load async options for a field
+const loadAsyncOptions = async (field: SettingField) => {
+  if (!field.optionsEndpoint) return
+
+  if (!asyncOptions.value[field.key]) {
+    asyncOptions.value[field.key] = { loading: false, data: [] }
+  }
+
+  asyncOptions.value[field.key].loading = true
+  try {
+    const response = await $fetch<{ success: boolean; agents: Array<{ label: string; value: string }> }>(
+      field.optionsEndpoint
+    )
+    if (response.success) {
+      asyncOptions.value[field.key].data = response.agents
+    }
+  } catch (error) {
+    console.error(`Failed to load options for ${field.key}:`, error)
+  } finally {
+    asyncOptions.value[field.key].loading = false
+  }
+}
+
 // Field definitions for each category
 const categoryFields: Record<string, SettingField[]> = {
   openclaw: [
@@ -211,7 +282,7 @@ const categoryFields: Record<string, SettingField[]> = {
       label: 'API Endpoint',
       type: 'text',
       description: 'OpenClaw API 服务器地址',
-      defaultValue: 'https://api.openclaw.dev'
+      defaultValue: 'http://127.0.0.1:18789'
     },
     {
       key: 'OPENCLAW_GATEWAY_URL',
@@ -231,9 +302,10 @@ const categoryFields: Record<string, SettingField[]> = {
     {
       key: 'OPENCLAW_AGENT_ID',
       label: 'Agent ID',
-      type: 'text',
+      type: 'async-select',
       description: 'OpenClaw Agent 标识符',
-      defaultValue: 'main'
+      defaultValue: 'main',
+      optionsEndpoint: '/api/openclaw/agents'
     },
     {
       key: 'CHAT_DATA_DIR',
@@ -373,8 +445,19 @@ const loadSettings = async () => {
   }
 }
 
+// Load async options for all async-select fields in the current category
+const loadCategoryAsyncOptions = () => {
+  const categoryFs = categoryFields[props.category] || []
+  for (const field of categoryFs) {
+    if (field.type === 'async-select' && field.optionsEndpoint) {
+      loadAsyncOptions(field)
+    }
+  }
+}
+
 // Watch category changes
 watch(() => props.category, () => {
   loadSettings()
+  loadCategoryAsyncOptions()
 }, { immediate: true })
 </script>

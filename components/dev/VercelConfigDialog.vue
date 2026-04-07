@@ -132,12 +132,36 @@
       <el-tab-pane label="OpenClaw" name="openclaw">
         <div class="space-y-4">
           <el-form-item label="Agent ID">
-            <el-input
+            <el-select
               v-model="form.openclawAgentId"
               placeholder="留空则使用全局默认 Agent"
-            />
+              class="w-full"
+              :loading="loadingAgents"
+              filterable
+              allow-create
+              default-first-option
+              clearable
+            >
+              <el-option
+                v-for="agent in agentList"
+                :key="agent.value"
+                :label="agent.label"
+                :value="agent.value"
+              />
+            </el-select>
             <template #footer>
-              <div class="text-xs text-zinc-500">指定该项目使用的 OpenClaw Agent。留空使用全局配置中的 Agent ID。</div>
+              <div class="flex items-center justify-between">
+                <div class="text-xs text-zinc-500">指定该项目使用的 OpenClaw Agent。留空使用全局配置中的 Agent ID。</div>
+                <el-button
+                  text
+                  type="primary"
+                  size="small"
+                  :loading="loadingAgents"
+                  @click="loadAgentList"
+                >
+                  刷新列表
+                </el-button>
+              </div>
             </template>
           </el-form-item>
 
@@ -269,6 +293,8 @@ const newProjectName = ref('')
 
 const vercelProjects = ref<VercelProject[]>([])
 const deployments = ref<Deployment[]>([])
+const agentList = ref<Array<{ label: string; value: string }>>([])
+const loadingAgents = ref(false)
 
 const form = reactive({
   vercelProjectId: '',
@@ -279,6 +305,21 @@ const form = reactive({
   installCommand: '',
   framework: ''
 })
+
+// 加载 Agent 列表
+const loadAgentList = async () => {
+  loadingAgents.value = true
+  try {
+    const response = await $fetch<{ success: boolean; agents: Array<{ label: string; value: string }> }>('/api/openclaw/agents')
+    if (response.success) {
+      agentList.value = response.agents
+    }
+  } catch (error) {
+    console.error('加载 Agent 列表失败:', error)
+  } finally {
+    loadingAgents.value = false
+  }
+}
 
 // 加载 Vercel 项目列表
 const loadVercelProjects = async () => {
@@ -495,6 +536,7 @@ watch(visible, (val) => {
     // 加载数据
     loadVercelProjects()
     loadDeployments()
+    loadAgentList()
   }
 })
 </script>
