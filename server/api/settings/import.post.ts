@@ -62,6 +62,14 @@ export default defineEventHandler(async (event) => {
           continue
         }
 
+        // Skip masked/redacted sensitive values to avoid overwriting real data
+        if (setting.isSensitive && typeof setting.value === 'string'
+          && (setting.value.includes('****') || setting.value === '***REDACTED***')) {
+          if (existing) {
+            continue // Keep existing real value
+          }
+        }
+
         await db.setting.upsert(setting.key, {
           value: setting.value,
           type: setting.type,

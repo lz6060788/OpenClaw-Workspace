@@ -58,6 +58,12 @@ export default defineEventHandler(async (event) => {
     for (const [key, value] of Object.entries(settings)) {
       try {
         const config = fieldConfig[key] || { type: inferType(value) }
+        const isSensitive = config.isSensitive || false
+
+        // Skip masked sensitive values (contains ****) — user didn't change them
+        if (isSensitive && typeof value === 'string' && value.includes('****')) {
+          continue
+        }
 
         // Convert value to string based on type
         let stringValue: string
@@ -77,7 +83,6 @@ export default defineEventHandler(async (event) => {
 
         // Encrypt sensitive values if encryption is available
         // Exception: ENCRYPTION_KEY itself is stored as plain text
-        const isSensitive = config.isSensitive || false
         const isEncryptionKey = key === 'ENCRYPTION_KEY'
         let storeValue = stringValue
         let isEncrypted = false
