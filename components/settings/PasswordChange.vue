@@ -177,9 +177,10 @@ const handleChangePassword = async () => {
     passwordStrength.value = 0
 
     // Logout and redirect to login
-    setTimeout(() => {
-      const { logout } = useUserSession()
-      logout()
+    setTimeout(async () => {
+      const { signOut } = useAuthState()
+      await signOut()
+      await navigateTo('/login')
     }, 1500)
   } catch (error: any) {
     console.error('Change password error:', error)

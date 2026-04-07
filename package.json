@@ -20,12 +20,11 @@
     "@prisma/client": "6.19.2",
     "@sidebase/nuxt-auth": "^1.2.0",
     "@unocss/preset-icons": "^66.6.7",
-    "[ant-design]": "link:@iconify-json/[ant-design]",
-    "[lucide]": "link:@iconify-json/[lucide]",
     "bcrypt": "^6.0.0",
     "element-plus": "^2.13.6",
     "monaco-editor-vue3": "^1.0.5",
     "nanoid": "^5.1.7",
+    "next-auth": "4.21.1",
     "nuxt": "^3.21.2",
     "pinia": "^3.0.4"
   },

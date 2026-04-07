@@ -1,8 +1,7 @@
 // server/api/projects/files.get.ts
 import { readdir, stat } from 'fs/promises'
 import { join } from 'path'
-
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+import { getProjectsDir } from '~/server/utils/projects'
 
 // 目录黑名单
 const DIR_BLACKLIST = new Set([
@@ -91,6 +90,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Project parameter is required' })
   }
 
+  const PROJECTS_DIR = await getProjectsDir()
   const projectPath = join(PROJECTS_DIR, project, path)
 
   try {

@@ -12,12 +12,4 @@ export default defineNuxtPlugin((nuxtApp) => {
   // 提供全局访问
   nuxtApp.provide('openclaw', client)
 
-  // 测试连接
-  if (process.client) {
-    client.testConnection().then(connected => {
-      console.log('[OpenClaw] Connection test:', connected ? 'OK' : 'FAILED')
-    }).catch(error => {
-      console.error('[OpenClaw] Connection test failed:', error)
-    })
-  }
 })

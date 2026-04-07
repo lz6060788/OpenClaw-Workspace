@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     const defaultValues: Record<string, Record<string, string>> = {
       openclaw: {
         OPENCLAW_API_KEY: '',
-        OPENCLAW_API_ENDPOINT: 'https://api.openclaw.dev',
+        OPENCLAW_API_ENDPOINT: 'http://127.0.0.1:18789',
         OPENCLAW_TIMEOUT: '30000',
         OPENCLAW_DEBUG: 'false',
       },

@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     const categoryFields: Record<string, Record<string, any>> = {
       openclaw: {
         OPENCLAW_API_KEY: { type: 'string', isSensitive: true },
-        OPENCLAW_API_ENDPOINT: { type: 'string', defaultValue: 'https://api.openclaw.dev' },
+        OPENCLAW_API_ENDPOINT: { type: 'string', defaultValue: 'http://127.0.0.1:18789' },
         OPENCLAW_TIMEOUT: { type: 'number', defaultValue: 30000 },
         OPENCLAW_DEBUG: { type: 'boolean', defaultValue: false },
       },
@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
         GITHUB_USERNAME: { type: 'string', defaultValue: '' },
         GITHUB_DEFAULT_BRANCH: { type: 'string', defaultValue: 'main' },
         GITHUB_AUTO_SYNC: { type: 'boolean', defaultValue: true },
+        GITHUB_PROJECTS_PATH: { type: 'string', defaultValue: '' },
       },
     }
 

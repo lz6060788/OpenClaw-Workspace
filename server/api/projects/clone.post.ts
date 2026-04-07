@@ -2,7 +2,7 @@
 import { mkdir } from 'fs/promises'
 import { join } from 'path'
 import { execSync } from 'child_process'
-import { db } from '~/server/utils/db'
+import { getProjectsDir } from '~/server/utils/projects'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -16,10 +16,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get GitHub projects path from database
-  const pathSetting = await db.setting.findByKey('GITHUB_PROJECTS_PATH')
-  const PROJECTS_DIR = pathSetting?.value || join(process.cwd(), 'github-projects')
+  const PROJECTS_DIR = await getProjectsDir()
 
-  if (!pathSetting?.value) {
+  // 检查是否使用了默认路径（即未配置）
+  if (PROJECTS_DIR === join(process.cwd(), 'github-projects')) {
     throw createError({
       statusCode: 400,
       message: 'GitHub 项目路径未配置，请在设置中配置'

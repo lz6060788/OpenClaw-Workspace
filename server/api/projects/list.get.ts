@@ -4,12 +4,7 @@ import { join, dirname } from 'path'
 import { execSync } from 'child_process'
 import { config } from '~/server/utils/config'
 import { db } from '~/server/utils/db'
-
-// Get GitHub projects path from database
-async function getProjectsDir() {
-  const pathSetting = await db.setting.findByKey('GITHUB_PROJECTS_PATH')
-  return pathSetting?.value || join(process.cwd(), 'github-projects')
-}
+import { getProjectsDir } from '~/server/utils/projects'
 
 const CACHE_FILE = join(process.cwd(), '.cache', 'github-repos.json')
 const CACHE_TTL = 10 * 60 * 1000 // 10 分钟缓存

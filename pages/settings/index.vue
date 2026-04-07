@@ -54,10 +54,20 @@
           </p>
         </div>
 
-        <!-- System category: Show password change and GitHub path config -->
+        <!-- System category: Show password change -->
         <template v-if="currentCategory === 'system'">
-          <GitHubPathConfig />
           <PasswordChange />
+        </template>
+
+        <!-- GitHub category: Show GitHub path config and settings form -->
+        <template v-else-if="currentCategory === 'github'">
+          <GitHubPathConfig />
+          <SettingsForm
+            :category="currentCategory"
+            :loading="loading"
+            @save="handleSave"
+            @reset="handleReset"
+          />
         </template>
 
         <!-- Other categories: Show settings form -->

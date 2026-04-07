@@ -212,7 +212,7 @@ export const config = {
   // OpenClaw configuration
   openclaw: {
     getApiKey: () => getConfig<string>('OPENCLAW_API_KEY', ''),
-    getApiEndpoint: () => getConfig<string>('OPENCLAW_API_ENDPOINT', 'https://api.openclaw.dev'),
+    getApiEndpoint: () => getConfig<string>('OPENCLAW_API_ENDPOINT', 'http://127.0.0.1:18789'),
     getTimeout: () => getConfig<number>('OPENCLAW_TIMEOUT', 30000),
     isDebug: () => getConfig<boolean>('OPENCLAW_DEBUG', false),
     getGatewayUrl: () => getConfig<string>('OPENCLAW_GATEWAY_URL', 'http://127.0.0.1:18789'),
