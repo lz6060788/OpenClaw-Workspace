@@ -333,7 +333,7 @@ const loadVercelProjects = async () => {
     }
   } catch (error) {
     console.error('加载 Vercel 项目失败:', error)
-    ElMessage.error('加载 Vercel 项目失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '加载 Vercel 项目失败')
   } finally {
     loadingVercelProjects.value = false
   }
@@ -363,7 +363,7 @@ const createVercelProject = async () => {
     }
   } catch (error) {
     console.error('创建 Vercel 项目失败:', error)
-    ElMessage.error('创建项目失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '创建项目失败')
   } finally {
     creatingProject.value = false
   }
@@ -436,7 +436,7 @@ const testDeploy = async () => {
     }
   } catch (error) {
     console.error('触发部署失败:', error)
-    ElMessage.error('触发部署失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '触发部署失败')
   } finally {
     testingDeploy.value = false
   }
@@ -452,6 +452,8 @@ const saveConfig = async () => {
       method: 'POST',
       body: {
         projectId: props.project.id,
+        projectName: props.project.name,
+        projectFullName: props.project.full_name,
         ...form
       }
     })
@@ -463,7 +465,7 @@ const saveConfig = async () => {
     }
   } catch (error) {
     console.error('保存配置失败:', error)
-    ElMessage.error('保存配置失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '保存配置失败')
   } finally {
     saving.value = false
   }

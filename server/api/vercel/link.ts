@@ -32,21 +32,21 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Check if project exists
-    const existingProject = await db.project.findById(body.projectId)
+    // Check if project exists (projectId from frontend is GitHub ID)
+    const existingProject = await db.project.findByGithubId(body.projectId)
     if (!existingProject) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Project not found'
+        statusMessage: 'Project not found in database. Please configure the project first.'
       })
     }
 
     // Get Vercel project details
     const vercelProject = await vercel.getVercelProject(body.vercelProjectId)
 
-    // Update project with Vercel configuration
+    // Update project with Vercel configuration (use database ID)
     const vercelTeamId = await config.vercel.getTeamId()
-    const updatedProject = await db.project.update(body.projectId, {
+    const updatedProject = await db.project.update(existingProject.id, {
       vercelProjectId: body.vercelProjectId,
       vercelUrl: vercelProject.url || null,
       vercelTeamId: vercelTeamId || null,

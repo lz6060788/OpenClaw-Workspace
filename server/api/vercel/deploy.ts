@@ -25,12 +25,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get project from database
-    const project = await db.project.findById(body.projectId)
+    // Get project from database (projectId from frontend is GitHub ID)
+    const project = await db.project.findByGithubId(body.projectId)
     if (!project) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Project not found'
+        statusMessage: 'Project not found in database. Please configure the project first.'
       })
     }
 

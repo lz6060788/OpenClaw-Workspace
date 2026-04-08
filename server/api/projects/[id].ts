@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const project = await db.project.findById(projectId)
+    const project = await db.project.findByGithubId(projectId)
 
     if (!project) {
       throw createError({

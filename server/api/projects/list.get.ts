@@ -159,19 +159,29 @@ export default defineEventHandler(async (event) => {
     }
   }
   
-  // 检查本地是否存在，并从数据库获取 openclawAgentId
+  // 检查本地是否存在，并从数据库获取项目配置
   const projectsDir = await getProjectsDir()
   const results = await Promise.all(repos.map(async repo => {
-    let openclawAgentId: string | null = null
+    let dbFields: Record<string, any> = {}
     try {
       const dbProject = await db.project.findByGithubId(repo.id)
-      openclawAgentId = dbProject?.openclawAgentId || null
+      if (dbProject) {
+        dbFields = {
+          openclawAgentId: dbProject.openclawAgentId || null,
+          vercelProjectId: dbProject.vercelProjectId || null,
+          vercelUrl: dbProject.vercelUrl || null,
+          buildCommand: dbProject.buildCommand || null,
+          outputDirectory: dbProject.outputDirectory || null,
+          installCommand: dbProject.installCommand || null,
+          framework: dbProject.framework || null,
+        }
+      }
     } catch {}
 
     return {
       ...repo,
       localExists: await checkLocalExists(repo.full_name, projectsDir),
-      openclawAgentId
+      ...dbFields
     }
   }))
   return results
