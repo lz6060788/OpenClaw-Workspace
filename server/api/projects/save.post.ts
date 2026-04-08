@@ -1,8 +1,7 @@
 // server/api/projects/save.post.ts
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
-
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+import { getProjectsDir } from '~/server/utils/projects'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -15,6 +14,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const PROJECTS_DIR = await getProjectsDir()
   const filePath = join(PROJECTS_DIR, project, path)
 
   try {

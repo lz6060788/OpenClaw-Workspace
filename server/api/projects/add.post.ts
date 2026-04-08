@@ -1,8 +1,7 @@
 // server/api/projects/add.post.ts
 import { mkdir } from 'fs/promises'
 import { join } from 'path'
-
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+import { getProjectsDir } from '~/server/utils/projects'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -23,6 +22,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const PROJECTS_DIR = await getProjectsDir()
   const projectPath = join(PROJECTS_DIR, name)
 
   try {

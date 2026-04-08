@@ -49,6 +49,11 @@ export const db = {
     // Find project by GitHub ID
     findByGithubId: (githubId: number) => prisma.gitHubProject.findUnique({
       where: { githubId },
+      include: {
+        deployments: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     }),
 
     // Find project by Vercel Project ID

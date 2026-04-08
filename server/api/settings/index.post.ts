@@ -1,5 +1,6 @@
 // server/api/settings/index.post.ts
 import { db } from '~/server/utils/db'
+import { encrypt, isEncryptionAvailable, initEncryptionKey } from '~/server/utils/encryption'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
     const categoryFields: Record<string, Record<string, any>> = {
       openclaw: {
         OPENCLAW_API_KEY: { type: 'string', isSensitive: true },
-        OPENCLAW_API_ENDPOINT: { type: 'string', defaultValue: 'https://api.openclaw.dev' },
+        OPENCLAW_API_ENDPOINT: { type: 'string', defaultValue: 'http://127.0.0.1:18789' },
         OPENCLAW_TIMEOUT: { type: 'number', defaultValue: 30000 },
         OPENCLAW_DEBUG: { type: 'boolean', defaultValue: false },
       },
@@ -45,6 +46,10 @@ export default defineEventHandler(async (event) => {
         GITHUB_USERNAME: { type: 'string', defaultValue: '' },
         GITHUB_DEFAULT_BRANCH: { type: 'string', defaultValue: 'main' },
         GITHUB_AUTO_SYNC: { type: 'boolean', defaultValue: true },
+        GITHUB_PROJECTS_PATH: { type: 'string', defaultValue: '' },
+      },
+      system: {
+        ENCRYPTION_KEY: { type: 'string', isSensitive: true, description: '加密密钥，用于保护敏感配置（Token 等）。首次配置后不可更改，否则已加密的数据将无法解密。' },
       },
     }
 
@@ -53,6 +58,12 @@ export default defineEventHandler(async (event) => {
     for (const [key, value] of Object.entries(settings)) {
       try {
         const config = fieldConfig[key] || { type: inferType(value) }
+        const isSensitive = config.isSensitive || false
+
+        // Skip masked sensitive values (contains ****) — user didn't change them
+        if (isSensitive && typeof value === 'string' && value.includes('****')) {
+          continue
+        }
 
         // Convert value to string based on type
         let stringValue: string
@@ -70,15 +81,30 @@ export default defineEventHandler(async (event) => {
             stringValue = String(value)
         }
 
+        // Encrypt sensitive values if encryption is available
+        // Exception: ENCRYPTION_KEY itself is stored as plain text
+        const isEncryptionKey = key === 'ENCRYPTION_KEY'
+        let storeValue = stringValue
+        let isEncrypted = false
+        if (isSensitive && !isEncryptionKey && stringValue && isEncryptionAvailable()) {
+          storeValue = encrypt(stringValue)
+          isEncrypted = true
+        }
+
         await db.setting.upsert(key, {
-          value: stringValue,
+          value: storeValue,
           type: config.type,
           category,
           description: config.description || null,
-          isSensitive: config.isSensitive || false,
-          isEncrypted: config.isSensitive || false,
+          isSensitive,
+          isEncrypted,
           defaultValue: config.defaultValue ? String(config.defaultValue) : null,
         })
+
+        // Refresh encryption key cache after saving ENCRYPTION_KEY
+        if (isEncryptionKey) {
+          await initEncryptionKey()
+        }
 
         results.updated++
       } catch (error: any) {

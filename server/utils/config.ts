@@ -1,6 +1,6 @@
 // server/utils/config.ts
 import { db } from './db'
-import { decrypt, isEncryptionAvailable } from './encryption'
+import { decrypt, isEncryptionAvailable, initEncryptionKey } from './encryption'
 
 /**
  * Configuration access layer
@@ -52,11 +52,18 @@ export async function getConfig<T = any>(
 
       // Decrypt sensitive values if requested
       if (setting.isEncrypted && decryptSensitive) {
+        // Ensure encryption key is loaded from database
+        await initEncryptionKey()
         if (!isEncryptionAvailable()) {
           console.warn(`Cannot decrypt ${key}: encryption key not available`)
           return defaultValue
         }
-        value = decrypt(setting.value)
+        try {
+          value = decrypt(setting.value)
+        } catch {
+          // Value was stored as plain text despite isEncrypted flag (migration case)
+          value = setting.value
+        }
       }
 
       // Convert value based on type
@@ -212,7 +219,7 @@ export const config = {
   // OpenClaw configuration
   openclaw: {
     getApiKey: () => getConfig<string>('OPENCLAW_API_KEY', ''),
-    getApiEndpoint: () => getConfig<string>('OPENCLAW_API_ENDPOINT', 'https://api.openclaw.dev'),
+    getApiEndpoint: () => getConfig<string>('OPENCLAW_API_ENDPOINT', 'http://127.0.0.1:18789'),
     getTimeout: () => getConfig<number>('OPENCLAW_TIMEOUT', 30000),
     isDebug: () => getConfig<boolean>('OPENCLAW_DEBUG', false),
     getGatewayUrl: () => getConfig<string>('OPENCLAW_GATEWAY_URL', 'http://127.0.0.1:18789'),

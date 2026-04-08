@@ -25,12 +25,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get project from database
-    const project = await db.project.findById(body.projectId)
+    // Get project from database (projectId from frontend is GitHub ID)
+    const project = await db.project.findByGithubId(body.projectId)
     if (!project) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Project not found'
+        statusMessage: 'Project not found in database. Please configure the project first.'
       })
     }
 
@@ -45,16 +45,24 @@ export default defineEventHandler(async (event) => {
     // Create deployment via Vercel API
     const deployment = await vercel.createDeployment({
       projectId: project.vercelProjectId,
+      projectName: project.name,
+      githubRepoId: project.githubId || undefined,
       branch: body.branch || project.defaultBranch,
       production: body.production || false,
     })
+
+    // Ensure URL has protocol
+    let deployUrl = deployment.url || null
+    if (deployUrl && !deployUrl.startsWith('http://') && !deployUrl.startsWith('https://')) {
+      deployUrl = `https://${deployUrl}`
+    }
 
     // Create deployment record in database
     const deploymentRecord = await db.deployment.create({
       projectId: project.id,
       vercelDeployId: deployment.id,
       status: deployment.status,
-      url: deployment.url || null,
+      url: deployUrl,
       production: deployment.production || false,
     })
 

@@ -18,17 +18,17 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get project from database
-    const project = await db.project.findById(projectId)
+    // Get project from database (projectId from frontend is GitHub ID)
+    const project = await db.project.findByGithubId(projectId)
     if (!project) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'Project not found'
+        statusMessage: 'Project not found in database. Please configure the project first.'
       })
     }
 
-    // Get latest deployment from database
-    const latestDeployment = await db.deployment.findLatestByProject(projectId)
+    // Get latest deployment from database (use database ID)
+    const latestDeployment = await db.deployment.findLatestByProject(project.id)
 
     if (!latestDeployment) {
       return {
@@ -42,7 +42,8 @@ export default defineEventHandler(async (event) => {
     let deploymentStatus = latestDeployment.status
     let deploymentUrl = latestDeployment.url
 
-    if (latestDeployment.status === 'building' || latestDeployment.status === 'queued') {
+    const pendingStatuses = ['BUILDING', 'QUEUED', 'INITIALIZING']
+    if (pendingStatuses.includes(latestDeployment.status.toUpperCase())) {
       try {
         const vercelDeployment = await vercel.getVercelDeployment(latestDeployment.vercelDeployId)
 
@@ -58,7 +59,7 @@ export default defineEventHandler(async (event) => {
           })
 
           deploymentStatus = vercelDeployment.status
-          deploymentUrl = vercelDeployment.url || null
+          deploymentUrl = vercelDeployment.url ? ensureProtocol(vercelDeployment.url) : null
         }
       } catch (error) {
         console.error('Failed to fetch deployment status from Vercel:', error)
@@ -67,7 +68,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       status: deploymentStatus,
-      url: deploymentUrl || project.vercelUrl || null,
+      url: deploymentUrl || (project.vercelUrl ? ensureProtocol(project.vercelUrl) : null),
       latestDeployment: {
         id: latestDeployment.id,
         vercelDeployId: latestDeployment.vercelDeployId,
@@ -92,3 +93,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+
+function ensureProtocol(url: string): string {
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    return `https://${url}`
+  }
+  return url
+}

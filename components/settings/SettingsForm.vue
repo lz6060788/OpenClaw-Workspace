@@ -400,6 +400,16 @@ const categoryFields: Record<string, SettingField[]> = {
       description: '定期自动同步仓库状态',
       defaultValue: true
     }
+  ],
+  system: [
+    {
+      key: 'ENCRYPTION_KEY',
+      label: '加密密钥',
+      type: 'password',
+      description: '用于保护敏感配置（Token 等）。首次配置后请勿更改，否则已加密的数据将无法解密。',
+      isSensitive: true,
+      defaultValue: ''
+    }
   ]
 }
 
@@ -420,7 +430,17 @@ const handleFieldChange = (key: string, value: any) => {
 const handleSave = () => {
   formRef.value?.validate((valid) => {
     if (valid) {
-      emit('save', formData.value)
+      // Filter out unchanged sensitive fields (still containing mask pattern)
+      const dataToSave: Record<string, any> = {}
+      for (const [key, value] of Object.entries(formData.value)) {
+        const field = fields.value.find(f => f.key === key)
+        const isSensitive = field?.isSensitive || field?.type === 'password'
+        if (isSensitive && typeof value === 'string' && value.includes('****')) {
+          continue // Skip unchanged masked value
+        }
+        dataToSave[key] = value
+      }
+      emit('save', dataToSave)
       originalData.value = { ...formData.value }
     }
   })

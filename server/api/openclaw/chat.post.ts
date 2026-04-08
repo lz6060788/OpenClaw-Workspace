@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     // 按项目解析 Agent ID：项目级覆盖 > 全局配置
     let agentId = globalAgentId
     if (projectId) {
-      const project = await db.project.findById(Number(projectId))
+      const project = await db.project.findByGithubId(Number(projectId))
       if (project?.openclawAgentId) {
         agentId = project.openclawAgentId
       }

@@ -1,10 +1,10 @@
 <!-- pages/login.vue -->
 <template>
-  <div class="min-h-screen flex-center bg-zinc-900 p-4">
+  <div class="min-h-screen flex items-center justify-center bg-zinc-900 p-4">
     <div class="w-full max-w-sm">
       <!-- Logo and Title -->
       <div class="text-center mb-8">
-        <div class="w-16 h-16 mx-auto mb-4 flex-center bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-500/20">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-500/20">
           <span class="text-3xl">🦞</span>
         </div>
         <h1 class="text-2xl font-semibold text-zinc-100 mb-1">OpenClaw Workspace</h1>
@@ -82,8 +82,6 @@ definePageMeta({
   auth: false
 })
 
-const { signIn, data } = useAuth()
-
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const errorMessage = ref('')
@@ -99,8 +97,7 @@ const rules: FormRules = {
     { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少 6 位', trigger: 'blur' }
+    { required: true, message: '请输入密码', trigger: 'blur' }
   ]
 }
 
@@ -112,27 +109,30 @@ const handleLogin = async () => {
     loading.value = true
     errorMessage.value = ''
 
-    await signIn('credentials', {
-      username: form.username,
-      password: form.password,
-      redirect: false
+    // Use custom auth endpoint
+    const response = await $fetch('/api/auth/signin', {
+      method: 'POST',
+      body: {
+        username: form.username,
+        password: form.password
+      }
     })
 
-    // Check if sign in was successful
-    if (data.value?.error) {
-      errorMessage.value = '用户名或密码错误'
-    } else {
-      // Redirect to home or the page user was trying to access
-      const redirect = useRoute().query.redirect as string || '/'
-      await navigateTo(redirect)
-    }
+    // Redirect to home or the page user was trying to access
+    const redirect = useRoute().query.redirect as string || '/'
+    await navigateTo(redirect)
   } catch (error: any) {
     console.error('Login error:', error)
     if (error.fields) {
       // Form validation error
       return
     }
-    errorMessage.value = error.message || '登录失败，请重试'
+    // Handle API errors
+    if (error.response?.status === 401) {
+      errorMessage.value = '用户名或密码错误'
+    } else {
+      errorMessage.value = error.message || '登录失败，请重试'
+    }
   } finally {
     loading.value = false
   }

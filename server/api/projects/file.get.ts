@@ -1,8 +1,7 @@
 // server/api/projects/file.get.ts
 import { readFile } from 'fs/promises'
 import { join } from 'path'
-
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+import { getProjectsDir } from '~/server/utils/projects'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -16,6 +15,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const PROJECTS_DIR = await getProjectsDir()
   const filePath = join(PROJECTS_DIR, project, path)
 
   try {

@@ -11,7 +11,7 @@ import { encrypt } from '~/server/utils/encryption'
 const migrationConfig = {
   openclaw: [
     { key: 'OPENCLAW_API_KEY', type: 'string', isSensitive: true },
-    { key: 'OPENCLAW_API_ENDPOINT', type: 'string', defaultValue: 'https://api.openclaw.dev' },
+    { key: 'OPENCLAW_API_ENDPOINT', type: 'string', defaultValue: 'http://127.0.0.1:18789' },
     { key: 'OPENCLAW_TIMEOUT', type: 'number', defaultValue: '30000' },
     { key: 'OPENCLAW_DEBUG', type: 'boolean', defaultValue: 'false' },
   ],

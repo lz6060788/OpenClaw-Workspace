@@ -168,9 +168,8 @@ onMounted(async () => {
 
 async function loadCurrentPath() {
   try {
-    const response = await $fetch('/api/settings') as any
-    const githubPathSetting = response?.system?.find((s: any) => s.key === 'GITHUB_PROJECTS_PATH')
-    currentPath.value = githubPathSetting?.value || ''
+    const response = await $fetch('/api/settings?category=github') as any
+    currentPath.value = response?.settings?.GITHUB_PROJECTS_PATH || ''
   } catch (error) {
     console.error('Failed to load current path:', error)
   }
@@ -270,7 +269,7 @@ async function savePath(path: string) {
   await $fetch('/api/settings', {
     method: 'POST',
     body: {
-      category: 'system',
+      category: 'github',
       settings: {
         GITHUB_PROJECTS_PATH: path
       }

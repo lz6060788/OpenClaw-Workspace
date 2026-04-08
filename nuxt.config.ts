@@ -10,25 +10,9 @@ export default defineNuxtConfig({
   // 禁用 SSR，使用 SPA 模式
   ssr: false,
 
-  // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia + Auth
-  modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt', '@sidebase/nuxt-auth'],
-
-  // Auth configuration
-  auth: {
-    // Global auth enabled
-    globalAppMiddleware: true,
-    // Enable session-based authentication
-    session: {
-      // Enable session refresh
-      enableRefreshPeriodically: 60000,
-      // Enable session refresh on window focus
-      enableRefreshOnWindowFocus: true,
-    },
-    // Production origin
-    origin: process.env.AUTH_ORIGIN || 'https://dev.theirises.cn',
-    // Base URL for auth endpoints
-    baseURL: '/api/auth',
-  },
+  // Element Plus + Nuxt UI (for color mode) + UnoCSS + Pinia
+  // Note: @sidebase/nuxt-auth is disabled - using custom auth implementation
+  modules: ['@nuxt/ui', '@unocss/nuxt', '@pinia/nuxt'],
 
   // 引入自定义 CSS
   css: ['~/assets/css/main.css'],
@@ -178,19 +162,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // Auth configuration
-  auth: {
-    // Global auth enabled
-    globalAppMiddleware: true,
-    // Enable session-based authentication
-    session: {
-      // Enable session refresh
-      enableRefreshPeriodically: 60000,
-      // Enable session refresh on window focus
-      enableRefreshOnWindowFocus: true,
-    },
-  },
-
   // Vite 配置
   vite: {
     server: {
@@ -218,10 +189,6 @@ export default defineNuxtConfig({
     // 生产环境监听配置
     // 允许从任何 IP 访问（Traefik 反向代理需要）
     listen: ['0.0.0.0:3000'],
-    // 设置环境变量
-    experimental: {
-      wasm: true
-    },
     envPrefix: '',
     runtimeConfig: {
       nitro: {

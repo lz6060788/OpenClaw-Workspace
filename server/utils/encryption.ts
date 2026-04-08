@@ -11,14 +11,37 @@ const KEY_LENGTH = 32
 const IV_LENGTH = 16
 const AUTH_TAG_LENGTH = 16
 
+// Cached encryption key loaded from database
+let _cachedEncryptionKey: string | null = null
+
 /**
- * Get or generate encryption key from environment
+ * Load encryption key from database and cache it.
+ * Called before any decrypt/encrypt operations.
+ */
+export async function initEncryptionKey(): Promise<void> {
+  if (_cachedEncryptionKey) return
+
+  try {
+    const { db } = await import('./db')
+    const setting = await db.setting.findByKey('ENCRYPTION_KEY')
+    if (setting?.value) {
+      _cachedEncryptionKey = setting.value
+    }
+  } catch {
+    // DB not available yet
+  }
+}
+
+/**
+ * Get or generate encryption key from cache, environment, or database
  */
 function getEncryptionKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY || process.env.OPENCLAW_ENCRYPTION_KEY
+  const key = _cachedEncryptionKey
+    || process.env.ENCRYPTION_KEY
+    || process.env.OPENCLAW_ENCRYPTION_KEY
 
   if (!key) {
-    throw new Error('ENCRYPTION_KEY environment variable is required for sensitive data encryption')
+    throw new Error('ENCRYPTION_KEY is not configured. Please configure it in Settings > System.')
   }
 
   // Use HKDF to derive a proper key from the environment variable

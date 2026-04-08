@@ -1,8 +1,7 @@
 // server/api/projects/[name]/files.get.ts
 import { readdir, stat } from 'fs/promises'
 import { join } from 'path'
-
-const PROJECTS_DIR = join(process.cwd(), 'github-projects')
+import { getProjectsDir } from '~/server/utils/projects'
 
 async function getFileTree(dir: string, relativePath = ''): Promise<any[]> {
   const entries = await readdir(dir, { withFileTypes: true })
@@ -37,6 +36,7 @@ async function getFileTree(dir: string, relativePath = ''): Promise<any[]> {
 
 export default defineEventHandler(async (event) => {
   const name = getRouterParam(event, 'name')
+  const PROJECTS_DIR = await getProjectsDir()
   const projectPath = join(PROJECTS_DIR, name!)
 
   try {

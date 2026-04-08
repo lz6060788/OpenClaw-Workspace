@@ -246,16 +246,27 @@ const openVercelConfig = (project: Project) => {
   showVercelConfig.value = true
 }
 
-const onVercelConfigured = (updatedProject: Project) => {
-  // 更新项目列表中的项目
-  const index = projects.value.findIndex(p => p.id === updatedProject.id)
+const onVercelConfigured = (updatedProject: any) => {
+  // Match by githubId (returned by API) or by id (GitHub ID from frontend)
+  const matchId = updatedProject.githubId || updatedProject.id
+  const index = projects.value.findIndex(p => p.id === matchId)
   if (index !== -1) {
-    projects.value[index] = updatedProject
+    // Merge config fields into existing project object (preserve GitHub API fields)
+    projects.value[index] = {
+      ...projects.value[index],
+      vercelProjectId: updatedProject.vercelProjectId,
+      vercelUrl: updatedProject.vercelUrl,
+      openclawAgentId: updatedProject.openclawAgentId,
+      buildCommand: updatedProject.buildCommand,
+      outputDirectory: updatedProject.outputDirectory,
+      installCommand: updatedProject.installCommand,
+      framework: updatedProject.framework,
+    }
   }
 
-  // 如果是当前项目，也更新 store
-  if (projectStore.currentProject?.id === updatedProject.id) {
-    projectStore.setCurrentProject(updatedProject)
+  // Update current project in store
+  if (projectStore.currentProject?.id === matchId) {
+    projectStore.setCurrentProject(projects.value[index])
   }
 
   ElMessage.success('Vercel 配置已更新')

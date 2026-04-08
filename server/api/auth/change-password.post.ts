@@ -13,14 +13,21 @@ function hashPassword(password: string): string {
 }
 
 export default defineEventHandler(async (event) => {
-  // Get current user from session
-  const session = await getUserSession(event)
+  // Get current user from session cookie
+  const sessionToken = getCookie(event, 'next-auth.session-token') || getCookie(event, '__Secure-next-auth.session-token')
 
-  if (!session?.user?.id) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized'
-    })
+  if (!sessionToken) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
+
+  const session = await db.session.findByToken(sessionToken)
+  if (!session || new Date(session.expiresAt) < new Date()) {
+    throw createError({ statusCode: 401, statusMessage: 'Session expired' })
+  }
+
+  const user = await db.user.findById(session.userId)
+  if (!user) {
+    throw createError({ statusCode: 401, statusMessage: 'User not found' })
   }
 
   const body = await readBody(event)
@@ -42,17 +49,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get user from database
-  const userId = parseInt(session.user.id)
-  const user = await db.user.findById(userId)
-
-  if (!user) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'User not found'
-    })
-  }
-
   // Verify current password
   const hashedCurrentPassword = hashPassword(currentPassword)
   const isValid = hashedCurrentPassword === user.password
@@ -68,7 +64,7 @@ export default defineEventHandler(async (event) => {
   const hashedNewPassword = hashPassword(newPassword)
 
   // Update password
-  await db.user.update(userId, {
+  await db.user.update(user.id, {
     password: hashedNewPassword
   })
 

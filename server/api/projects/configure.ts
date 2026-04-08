@@ -8,6 +8,8 @@ import { db } from '~/server/utils/db'
 
 interface ConfigureRequest {
   projectId: number
+  projectName?: string
+  projectFullName?: string
   vercelProjectId?: string
   vercelUrl?: string
   vercelTeamId?: string
@@ -30,12 +32,24 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Check if project exists
-    const existingProject = await db.project.findById(body.projectId)
+    // Find project by GitHub ID (projectId from frontend is GitHub ID)
+    let existingProject = await db.project.findByGithubId(body.projectId)
+
+    // Auto-create project in DB if not exists
     if (!existingProject) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Project not found'
+      if (!body.projectName || !body.projectFullName) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'Project not found in database. Provide projectName and projectFullName to auto-create.'
+        })
+      }
+      const nameParts = body.projectFullName.split('/')
+      existingProject = await db.project.upsert({
+        githubId: body.projectId,
+        name: body.projectName,
+        fullName: body.projectFullName,
+        owner: nameParts[0] || '',
+        defaultBranch: 'main',
       })
     }
 
@@ -61,8 +75,8 @@ export default defineEventHandler(async (event) => {
     if (body.installCommand !== undefined) updateData.installCommand = body.installCommand || null
     if (body.framework !== undefined) updateData.framework = body.framework || null
 
-    // Update project configuration
-    const updatedProject = await db.project.update(body.projectId, updateData)
+    // Update project configuration (use database ID, not GitHub ID)
+    const updatedProject = await db.project.update(existingProject.id, updateData)
 
     return {
       success: true,

@@ -43,6 +43,7 @@
           v-for="child in node.children"
           :key="child.path"
           :node="child"
+          :project-path="projectPath"
           @select="$emit('select', $event)"
         />
         <div v-if="hasLoaded && node.children?.length === 0" class="text-xs text-zinc-600 py-2 px-3">

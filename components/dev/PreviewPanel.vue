@@ -6,17 +6,17 @@
       <div class="flex items-center gap-3">
         <!-- 部署状态 -->
         <div v-if="deploymentStatus" class="flex items-center gap-2">
-          <el-icon v-if="['queued', 'building'].includes(deploymentStatus.status)" class="is-loading text-blue-400">
+          <el-icon v-if="['QUEUED', 'BUILDING', 'INITIALIZING', 'queued', 'building', 'initializing'].includes(deploymentStatus.status)" class="is-loading text-blue-400">
             <Loading />
           </el-icon>
           <Icon
-            v-else-if="deploymentStatus.status === 'ready'"
+            v-else-if="['READY', 'ready'].includes(deploymentStatus.status)"
             name="check-circle-2"
             size="sm"
             icon-color="rgb(52 211 153)"
           />
           <Icon
-            v-else-if="deploymentStatus.status === 'error'"
+            v-else-if="['ERROR', 'error'].includes(deploymentStatus.status)"
             name="x-circle"
             size="sm"
             icon-color="rgb(239 68 68)"
@@ -147,30 +147,40 @@ const deploymentStatus = computed(() => {
 // 部署 URL（优先使用最新部署的 URL，否则使用项目的 Vercel URL）
 const deploymentUrl = computed(() => {
   if (deploymentStatus.value?.url) {
-    return deploymentStatus.value.url
+    return ensureProtocol(deploymentStatus.value.url)
   }
-  return currentProject.value?.vercelUrl || null
+  if (currentProject.value?.vercelUrl) {
+    return ensureProtocol(currentProject.value.vercelUrl)
+  }
+  return null
 })
 
 // 预览 URL
 const previewUrl = computed(() => {
-  if (deploymentUrl.value) {
-    return deploymentUrl.value
-  }
-  return ''
+  return deploymentUrl.value || ''
 })
+
+function ensureProtocol(url: string): string {
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    return `https://${url}`
+  }
+  return url
+}
 
 // 获取部署状态文本
 const getDeploymentStatusText = (status: string): string => {
+  const s = status.toUpperCase()
   const statusMap: Record<string, string> = {
-    queued: '队列中...',
-    building: '构建中...',
-    ready: '部署成功',
-    error: '部署失败',
-    cancelled: '已取消',
-    deactivated: '已停用'
+    QUEUED: '队列中...',
+    BUILDING: '构建中...',
+    INITIALIZING: '初始化中...',
+    READY: '部署成功',
+    ERROR: '部署失败',
+    CANCELED: '已取消',
+    CANCELLED: '已取消',
+    DEACTIVATED: '已停用'
   }
-  return statusMap[status] || status
+  return statusMap[s] || status
 }
 
 // 刷新部署状态
@@ -179,7 +189,10 @@ const refreshDeploymentStatus = async () => {
 
   refreshingStatus.value = true
   try {
-    await deploymentStore.fetchDeploymentStatus(currentProject.value.id)
+    const deployment = await deploymentStore.fetchDeploymentStatus(currentProject.value.id)
+    if (deployment && currentProject.value) {
+      projectStore.updateLatestDeploy(currentProject.value.id, deployment)
+    }
   } catch (error) {
     console.error('刷新部署状态失败:', error)
   } finally {

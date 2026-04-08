@@ -7,6 +7,7 @@
     append-to-body
     @close="handleClose"
   >
+    <el-form label-width="120px">
     <el-tabs v-model="activeTab" class="w-full">
       <!-- Vercel 项目选择 -->
       <el-tab-pane label="Vercel 项目" name="vercel">
@@ -216,6 +217,7 @@
         </el-timeline>
       </el-tab-pane>
     </el-tabs>
+    </el-form>
 
     <template #footer>
       <div class="flex items-center justify-between">
@@ -331,7 +333,7 @@ const loadVercelProjects = async () => {
     }
   } catch (error) {
     console.error('加载 Vercel 项目失败:', error)
-    ElMessage.error('加载 Vercel 项目失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '加载 Vercel 项目失败')
   } finally {
     loadingVercelProjects.value = false
   }
@@ -361,7 +363,7 @@ const createVercelProject = async () => {
     }
   } catch (error) {
     console.error('创建 Vercel 项目失败:', error)
-    ElMessage.error('创建项目失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '创建项目失败')
   } finally {
     creatingProject.value = false
   }
@@ -434,7 +436,7 @@ const testDeploy = async () => {
     }
   } catch (error) {
     console.error('触发部署失败:', error)
-    ElMessage.error('触发部署失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '触发部署失败')
   } finally {
     testingDeploy.value = false
   }
@@ -450,6 +452,8 @@ const saveConfig = async () => {
       method: 'POST',
       body: {
         projectId: props.project.id,
+        projectName: props.project.name,
+        projectFullName: props.project.full_name,
         ...form
       }
     })
@@ -461,7 +465,7 @@ const saveConfig = async () => {
     }
   } catch (error) {
     console.error('保存配置失败:', error)
-    ElMessage.error('保存配置失败')
+    ElMessage.error((error as any)?.data?.message || (error as any)?.message || '保存配置失败')
   } finally {
     saving.value = false
   }
@@ -485,41 +489,60 @@ const formatDate = (date: Date): string => {
 
 // 获取状态类型
 const getStatusType = (status: string): string => {
+  const s = status.toUpperCase()
   const typeMap: Record<string, string> = {
-    queued: 'info',
-    building: 'warning',
-    ready: 'success',
-    error: 'danger',
-    cancelled: 'info',
-    deactivated: 'info'
+    QUEUED: 'info',
+    BUILDING: 'warning',
+    INITIALIZING: 'warning',
+    READY: 'success',
+    ERROR: 'danger',
+    CANCELED: 'info',
+    CANCELLED: 'info',
+    DEACTIVATED: 'info'
   }
-  return typeMap[status] || 'info'
+  return typeMap[s] || 'info'
 }
 
 // 获取状态文本
 const getStatusText = (status: string): string => {
+  const s = status.toUpperCase()
   const textMap: Record<string, string> = {
-    queued: '队列中',
-    building: '构建中',
-    ready: '成功',
-    error: '失败',
-    cancelled: '取消',
-    deactivated: '停用'
+    QUEUED: '队列中',
+    BUILDING: '构建中',
+    INITIALIZING: '初始化中',
+    READY: '成功',
+    ERROR: '失败',
+    CANCELED: '取消',
+    CANCELLED: '取消',
+    DEACTIVATED: '停用'
   }
-  return textMap[status] || status
+  return textMap[s] || status
 }
 
 // 获取时间轴类型
 const getTimelineType = (status: string): string => {
+  const s = status.toUpperCase()
   const typeMap: Record<string, string> = {
-    ready: 'success',
-    error: 'danger',
-    cancelled: 'info',
-    building: 'primary',
-    queued: 'info'
+    READY: 'success',
+    ERROR: 'danger',
+    CANCELED: 'info',
+    CANCELLED: 'info',
+    BUILDING: 'primary',
+    INITIALIZING: 'primary',
+    QUEUED: 'info'
   }
-  return typeMap[status] || 'primary'
+  return typeMap[s] || 'primary'
 }
+
+// 当选择 Vercel 项目时，自动填充 URL
+watch(() => form.vercelProjectId, (newId) => {
+  if (newId && !form.vercelUrl) {
+    const selectedProject = vercelProjects.value.find(p => p.id === newId)
+    if (selectedProject?.url) {
+      form.vercelUrl = selectedProject.url.startsWith('http') ? selectedProject.url : `https://${selectedProject.url}`
+    }
+  }
+})
 
 // 监听对话框打开
 watch(visible, (val) => {
