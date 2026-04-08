@@ -8,78 +8,40 @@
       </div>
     </div>
 
+    <!-- Agent 选择器 -->
+    <div class="agent-selector">
+      <el-select
+        v-model="docsStore.selectedAgent"
+        placeholder="选择 Agent"
+        filterable
+        size="default"
+        @change="onAgentChange"
+      >
+        <el-option
+          v-for="agent in docsStore.agentList"
+          :key="agent.id"
+          :label="agent.id"
+          :value="agent.id"
+        />
+      </el-select>
+    </div>
+
     <div class="sidebar-content">
-      <!-- 配置文件 -->
-      <div class="sidebar-section">
-        <button class="section-header" @click="toggleSection('config')">
-          <Icon :name="isExpanded.config ? 'chevron-down' : 'chevron-right'" size="xs" />
-          <span>配置文件</span>
-        </button>
-        <Transition name="collapse">
-          <div v-if="isExpanded.config" class="section-content">
-            <div
-              v-for="file in docsStore.configFiles"
-              :key="file"
-              class="file-item"
-              :class="{ active: docsStore.currentDoc === file }"
-              @click="selectDoc(file)"
-            >
-              <Icon name="file" size="xs" />
-              <span>{{ file }}</span>
-            </div>
-          </div>
-        </Transition>
-      </div>
-
-      <!-- Skills -->
-      <div class="sidebar-section">
-        <button class="section-header" @click="toggleSection('skills')">
-          <Icon :name="isExpanded.skills ? 'chevron-down' : 'chevron-right'" size="xs" />
-          <span>Skills</span>
-        </button>
-        <Transition name="collapse">
-          <div v-if="isExpanded.skills" class="section-content">
-            <div
-              v-for="skill in docsStore.skills"
-              :key="skill"
-              class="file-item"
-              :class="{ active: docsStore.currentDoc === `skills/${skill}` }"
-              @click="selectDoc(`skills/${skill}`)"
-            >
-              <Icon name="sparkles" size="xs" />
-              <span>{{ skill }}</span>
-            </div>
-            <div v-if="docsStore.skills.length === 0" class="loading-state">
-              加载中...
-            </div>
-          </div>
-        </Transition>
-      </div>
-
-      <!-- Memory -->
-      <div class="sidebar-section">
-        <button class="section-header" @click="toggleSection('memory')">
-          <Icon :name="isExpanded.memory ? 'chevron-down' : 'chevron-right'" size="xs" />
-          <span>Memory</span>
-        </button>
-        <Transition name="collapse">
-          <div v-if="isExpanded.memory" class="section-content">
-            <div
-              v-for="file in docsStore.memoryFiles"
-              :key="file"
-              class="file-item"
-              :class="{ active: docsStore.currentDoc === `memory/${file}` }"
-              @click="selectDoc(`memory/${file}`)"
-            >
-              <Icon name="calendar" size="xs" />
-              <span>{{ file.replace('.md', '') }}</span>
-            </div>
-            <div v-if="docsStore.memoryFiles.length === 0" class="loading-state">
-              加载中...
-            </div>
-          </div>
-        </Transition>
-      </div>
+      <el-tree
+        :data="treeData"
+        node-key="doc"
+        default-expand-all
+        highlight-current
+        :props="{ label: 'label', children: 'children' }"
+        @node-click="onNodeClick"
+      >
+        <template #default="{ node, data }">
+          <span class="tree-node" :class="{ 'is-leaf': !data.children }">
+            <el-icon v-if="data.icon" class="tree-node-icon"><component :is="data.icon" /></el-icon>
+            <span>{{ node.label }}</span>
+          </span>
+        </template>
+      </el-tree>
     </div>
   </aside>
 </template>
@@ -87,45 +49,71 @@
 <script setup lang="ts">
 import { useDocsStore } from '~/stores/docs'
 import * as Icons from '@element-plus/icons-vue'
+import { Document, MagicStick, Memo } from '@element-plus/icons-vue'
 
 const emit = defineEmits(['select'])
 
 const docsStore = useDocsStore()
 
-const isExpanded = reactive({
-  config: true,
-  skills: true,
-  memory: true,
-})
+const treeData = computed(() => [
+  {
+    label: '配置文件',
+    icon: Document,
+    children: docsStore.configFiles.map(f => ({ label: f, doc: f })),
+  },
+  {
+    label: 'Skills',
+    icon: MagicStick,
+    children: docsStore.skills.map(s => ({ label: s, doc: `skills/${s}` })),
+  },
+  {
+    label: 'Memory',
+    icon: Memo,
+    children: docsStore.memoryFiles.map(f => ({ label: f.replace('.md', ''), doc: `memory/${f}` })),
+  },
+])
 
-const toggleSection = (section: keyof typeof isExpanded) => {
-  isExpanded[section] = !isExpanded[section]
+const onNodeClick = (data: any) => {
+  if (data.doc) {
+    docsStore.setCurrentDoc(data.doc)
+    emit('select', data.doc)
+  }
 }
 
-const selectDoc = (doc: string) => {
-  docsStore.setCurrentDoc(doc)
-  emit('select', doc)
+const loadFileLists = async () => {
+  const agentId = docsStore.selectedAgent || undefined
+  try {
+    const [configFiles, skills, memoryFiles] = await Promise.all([
+      $fetch('/api/docs/config-files', { params: { agentId } }) as Promise<string[]>,
+      $fetch('/api/docs/skills') as Promise<string[]>,
+      $fetch('/api/docs/memory', { params: { agentId } }) as Promise<string[]>,
+    ])
+    docsStore.setConfigFiles(configFiles || [])
+    docsStore.setSkills(skills || [])
+    docsStore.setMemoryFiles(memoryFiles || [])
+  } catch (e) {
+    console.error('Failed to load file lists:', e)
+  }
 }
 
-// 加载 Skills 和 Memory 文件列表
+const onAgentChange = () => {
+  docsStore.setCurrentDoc('')
+  loadFileLists()
+}
+
 onMounted(async () => {
+  // 加载 agent 列表
   try {
-    const skills = await $fetch('/api/docs/skills') as string[]
-    if (skills) {
-      docsStore.setSkills(skills)
+    const agents = await $fetch('/api/docs/agents') as { id: string, workspace: string }[]
+    docsStore.setAgentList(agents || [])
+    if (agents.length > 0 && !docsStore.selectedAgent) {
+      docsStore.setSelectedAgent(agents[0].id)
     }
   } catch (e) {
-    console.error('Failed to load skills:', e)
+    console.error('Failed to load agents:', e)
   }
 
-  try {
-    const memoryFiles = await $fetch('/api/docs/memory') as string[]
-    if (memoryFiles) {
-      docsStore.setMemoryFiles(memoryFiles)
-    }
-  } catch (e) {
-    console.error('Failed to load memory files:', e)
-  }
+  await loadFileLists()
 })
 </script>
 
@@ -149,76 +137,49 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+.agent-selector {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.agent-selector :deep(.el-select) {
+  width: 100%;
+}
+
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-3);
 }
 
-.sidebar-section {
-  margin-bottom: var(--spacing-4);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: background-color 0.15s ease-out;
-  color: #f1f5f9;
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.section-header:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.section-content {
-  padding-left: var(--spacing-4);
-}
-
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  font-size: var(--text-sm);
+.sidebar-content :deep(.el-tree) {
+  background: transparent;
   color: rgba(241, 245, 249, 0.7);
+  --el-tree-node-hover-bg-color: rgba(255, 255, 255, 0.05);
 }
 
-.file-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
+.sidebar-content :deep(.el-tree-node__content) {
+  height: 32px;
+  border-radius: var(--radius-md);
 }
 
-.file-item.active {
+.sidebar-content :deep(.el-tree-node.is-current > .el-tree-node__content) {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
   color: #60a5fa;
 }
 
-.loading-state {
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--text-xs);
-  color: rgba(241, 245, 249, 0.4);
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
 }
 
-/* 折叠动画 */
-.collapse-enter-active,
-.collapse-leave-active {
-  transition: all 0.2s ease-out;
-  overflow: hidden;
+.tree-node-icon {
+  font-size: 14px;
 }
 
-.collapse-enter-from,
-.collapse-leave-to {
-  max-height: 0;
-  opacity: 0;
+.tree-node.is-leaf {
+  color: rgba(241, 245, 249, 0.7);
 }
 </style>

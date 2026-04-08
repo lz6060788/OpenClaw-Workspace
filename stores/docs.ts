@@ -6,9 +6,11 @@ export const useDocsStore = defineStore('docs', {
     currentDoc: '' as string,
     docContent: '' as string,
     originalContent: '' as string,
-    configFiles: ['AGENTS.md', 'SOUL.md', 'USER.md', 'TOOLS.md', 'IDENTITY.md', 'HEARTBEAT.md'],
+    configFiles: [] as string[],
     skills: [] as string[],
     memoryFiles: [] as string[],
+    selectedAgent: '' as string,
+    agentList: [] as { id: string, workspace: string }[],
   }),
   actions: {
     setCurrentDoc(doc: string) {
@@ -23,6 +25,15 @@ export const useDocsStore = defineStore('docs', {
     },
     setMemoryFiles(files: string[]) {
       this.memoryFiles = files
+    },
+    setConfigFiles(files: string[]) {
+      this.configFiles = files
+    },
+    setSelectedAgent(agentId: string) {
+      this.selectedAgent = agentId
+    },
+    setAgentList(list: { id: string, workspace: string }[]) {
+      this.agentList = list
     },
   },
 })

@@ -1,10 +1,11 @@
 // server/api/docs/save.post.ts
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
+import { resolveWorkspace } from '~/server/utils/docs'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { doc, content } = body
+  const { doc, content, agentId } = body
 
   if (!doc || content === undefined) {
     throw createError({
@@ -14,13 +15,12 @@ export default defineEventHandler(async (event) => {
   }
 
   let filePath: string
+  const workspacePath = await resolveWorkspace(agentId)
 
   if (doc.startsWith('memory/')) {
     const fileName = doc.replace('memory/', '')
-    const workspacePath = join(process.env.HOME || '', '.openclaw/workspace')
     filePath = join(workspacePath, 'memory', fileName)
   } else {
-    const workspacePath = join(process.env.HOME || '', '.openclaw/workspace')
     filePath = join(workspacePath, doc)
   }
 

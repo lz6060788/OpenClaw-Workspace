@@ -1,4 +1,4 @@
-// server/api/docs/memory.get.ts
+// server/api/docs/config-files.get.ts
 import { readdir } from 'fs/promises'
 import { join } from 'path'
 import { resolveWorkspace } from '~/server/utils/docs'
@@ -8,15 +8,14 @@ export default defineEventHandler(async (event) => {
   const agentId = query.agentId as string | undefined
 
   const workspacePath = await resolveWorkspace(agentId)
-  const memoryPath = join(workspacePath, 'memory')
 
   try {
-    const files = await readdir(memoryPath)
-    return files
+    const files = await readdir(workspacePath)
+    const mdFiles = files
       .filter(file => file.endsWith('.md'))
       .sort()
-      .reverse()
-  } catch (error) {
+    return mdFiles
+  } catch {
     return []
   }
 })

@@ -74,6 +74,15 @@ onMounted(async () => {
   }
 })
 
+// 构建 API URL，附带 agentId
+const buildContentUrl = (doc: string, action: 'content' | 'save') => {
+  const params = new URLSearchParams({ doc })
+  if (docsStore.selectedAgent) {
+    params.set('agentId', docsStore.selectedAgent)
+  }
+  return `/api/docs/${action}?${params.toString()}`
+}
+
 // 监听文档变化
 watch(() => docsStore.currentDoc, async () => {
   if (!docsStore.currentDoc) {
@@ -85,7 +94,7 @@ watch(() => docsStore.currentDoc, async () => {
   }
 
   try {
-    const docContent = await $fetch(`/api/docs/content?doc=${encodeURIComponent(docsStore.currentDoc)}`) as string
+    const docContent = await $fetch(buildContentUrl(docsStore.currentDoc, 'content')) as string
     if (docContent !== null) {
       content.value = docContent
       docsStore.setDocContent(docContent)
@@ -110,7 +119,8 @@ const saveDoc = async () => {
       method: 'POST',
       body: {
         doc: docsStore.currentDoc,
-        content: content.value
+        content: content.value,
+        agentId: docsStore.selectedAgent || undefined,
       }
     })
     docsStore.setDocContent(content.value)
@@ -123,7 +133,7 @@ const refresh = async () => {
   if (!docsStore.currentDoc) return
 
   try {
-    const docContent = await $fetch(`/api/docs/content?doc=${encodeURIComponent(docsStore.currentDoc)}`) as string
+    const docContent = await $fetch(buildContentUrl(docsStore.currentDoc, 'content')) as string
     if (docContent !== null) {
       content.value = docContent
       docsStore.setDocContent(docContent)
