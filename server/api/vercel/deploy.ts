@@ -51,12 +51,18 @@ export default defineEventHandler(async (event) => {
       production: body.production || false,
     })
 
+    // Ensure URL has protocol
+    let deployUrl = deployment.url || null
+    if (deployUrl && !deployUrl.startsWith('http://') && !deployUrl.startsWith('https://')) {
+      deployUrl = `https://${deployUrl}`
+    }
+
     // Create deployment record in database
     const deploymentRecord = await db.deployment.create({
       projectId: project.id,
       vercelDeployId: deployment.id,
       status: deployment.status,
-      url: deployment.url || null,
+      url: deployUrl,
       production: deployment.production || false,
     })
 

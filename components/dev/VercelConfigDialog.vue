@@ -489,40 +489,49 @@ const formatDate = (date: Date): string => {
 
 // 获取状态类型
 const getStatusType = (status: string): string => {
+  const s = status.toUpperCase()
   const typeMap: Record<string, string> = {
-    queued: 'info',
-    building: 'warning',
-    ready: 'success',
-    error: 'danger',
-    cancelled: 'info',
-    deactivated: 'info'
+    QUEUED: 'info',
+    BUILDING: 'warning',
+    INITIALIZING: 'warning',
+    READY: 'success',
+    ERROR: 'danger',
+    CANCELED: 'info',
+    CANCELLED: 'info',
+    DEACTIVATED: 'info'
   }
-  return typeMap[status] || 'info'
+  return typeMap[s] || 'info'
 }
 
 // 获取状态文本
 const getStatusText = (status: string): string => {
+  const s = status.toUpperCase()
   const textMap: Record<string, string> = {
-    queued: '队列中',
-    building: '构建中',
-    ready: '成功',
-    error: '失败',
-    cancelled: '取消',
-    deactivated: '停用'
+    QUEUED: '队列中',
+    BUILDING: '构建中',
+    INITIALIZING: '初始化中',
+    READY: '成功',
+    ERROR: '失败',
+    CANCELED: '取消',
+    CANCELLED: '取消',
+    DEACTIVATED: '停用'
   }
-  return textMap[status] || status
+  return textMap[s] || status
 }
 
 // 获取时间轴类型
 const getTimelineType = (status: string): string => {
+  const s = status.toUpperCase()
   const typeMap: Record<string, string> = {
-    ready: 'success',
-    error: 'danger',
-    cancelled: 'info',
-    building: 'primary',
-    queued: 'info'
+    READY: 'success',
+    ERROR: 'danger',
+    CANCELED: 'info',
+    CANCELLED: 'info',
+    BUILDING: 'primary',
+    INITIALIZING: 'primary',
+    QUEUED: 'info'
   }
-  return typeMap[status] || 'primary'
+  return typeMap[s] || 'primary'
 }
 
 // 监听对话框打开
