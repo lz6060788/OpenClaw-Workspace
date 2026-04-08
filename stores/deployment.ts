@@ -163,7 +163,7 @@ export const useDeploymentStore = defineStore('deployment', {
           this.upsertDeployment(deployment)
 
           // 如果部署完成或失败，停止轮询
-          if (['ready', 'error', 'cancelled', 'deactivated'].includes(deployment.status)) {
+          if (['READY', 'ERROR', 'CANCELLED', 'CANCELED', 'DEACTIVATED', 'ready', 'error', 'cancelled', 'canceled', 'deactivated'].includes(deployment.status)) {
             this.stopPolling(projectId)
           }
 

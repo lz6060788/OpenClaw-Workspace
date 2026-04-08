@@ -534,6 +534,16 @@ const getTimelineType = (status: string): string => {
   return typeMap[s] || 'primary'
 }
 
+// 当选择 Vercel 项目时，自动填充 URL
+watch(() => form.vercelProjectId, (newId) => {
+  if (newId && !form.vercelUrl) {
+    const selectedProject = vercelProjects.value.find(p => p.id === newId)
+    if (selectedProject?.url) {
+      form.vercelUrl = selectedProject.url.startsWith('http') ? selectedProject.url : `https://${selectedProject.url}`
+    }
+  }
+})
+
 // 监听对话框打开
 watch(visible, (val) => {
   if (val && props.project) {
