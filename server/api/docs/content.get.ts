@@ -1,10 +1,12 @@
 // server/api/docs/content.get.ts
-import { readFile } from 'fs/promises'
+import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
+import { resolveWorkspace } from '~/server/utils/docs'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const doc = query.doc as string
+  const agentId = query.agentId as string | undefined
 
   if (!doc) {
     throw createError({
@@ -16,7 +18,7 @@ export default defineEventHandler(async (event) => {
   let filePath: string
 
   if (doc.startsWith('skills/')) {
-    // Skills 文档
+    // Skills 文档 — 全局共享，不受 agent 影响
     const skillName = doc.replace('skills/', '')
     const openclawPath = join(process.env.HOME || '', '.nvm/versions/node')
     const nodeVersions = await readdir(openclawPath)
@@ -35,11 +37,11 @@ export default defineEventHandler(async (event) => {
   } else if (doc.startsWith('memory/')) {
     // Memory 文件
     const fileName = doc.replace('memory/', '')
-    const workspacePath = join(process.env.HOME || '', '.openclaw/workspace')
+    const workspacePath = await resolveWorkspace(agentId)
     filePath = join(workspacePath, 'memory', fileName)
   } else {
     // 配置文件
-    const workspacePath = join(process.env.HOME || '', '.openclaw/workspace')
+    const workspacePath = await resolveWorkspace(agentId)
     filePath = join(workspacePath, doc)
   }
 
