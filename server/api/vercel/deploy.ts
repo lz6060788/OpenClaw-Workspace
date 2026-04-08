@@ -45,6 +45,8 @@ export default defineEventHandler(async (event) => {
     // Create deployment via Vercel API
     const deployment = await vercel.createDeployment({
       projectId: project.vercelProjectId,
+      projectName: project.name,
+      githubRepoId: project.githubId || undefined,
       branch: body.branch || project.defaultBranch,
       production: body.production || false,
     })

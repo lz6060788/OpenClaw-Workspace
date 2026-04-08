@@ -33,6 +33,8 @@ export interface VercelDeployment {
 
 export interface VercelDeploymentCreateParams {
   projectId: string
+  projectName: string
+  githubRepoId?: number
   branch?: string
   production?: boolean
 }
@@ -163,7 +165,7 @@ export async function getVercelDeployments(
 export async function getVercelDeployment(
   deploymentId: string
 ): Promise<VercelDeployment> {
-  return vercelFetch<VercelDeployment>(`/${VERCEL_API_VERSION}/v13/deployments/${deploymentId}`)
+  return vercelFetch<VercelDeployment>(`/v13/deployments/${deploymentId}`)
 }
 
 /**
@@ -172,15 +174,26 @@ export async function getVercelDeployment(
 export async function createDeployment(
   params: VercelDeploymentCreateParams
 ): Promise<VercelDeployment> {
-  const { projectId, branch = 'main', production = false } = params
+  const { projectId, projectName, githubRepoId, branch = 'main', production = false } = params
 
-  return vercelFetch<VercelDeployment>(`/${VERCEL_API_VERSION}/v13/deployments`, {
+  const body: Record<string, any> = {
+    name: projectName,
+    project: projectId,
+    target: production ? 'production' : 'preview',
+  }
+
+  // Use gitSource for Git-connected projects
+  if (githubRepoId) {
+    body.gitSource = {
+      type: 'github',
+      ref: branch,
+      repoId: githubRepoId,
+    }
+  }
+
+  return vercelFetch<VercelDeployment>(`/v13/deployments`, {
     method: 'POST',
-    body: JSON.stringify({
-      project: projectId,
-      branch,
-      target: production ? 'production' : 'preview',
-    }),
+    body: JSON.stringify(body),
   })
 }
 
@@ -203,7 +216,7 @@ export async function getLatestDeployment(
  * Cancel a deployment
  */
 export async function cancelDeployment(deploymentId: string): Promise<void> {
-  await vercelFetch(`/${VERCEL_API_VERSION}/v13/deployments/${deploymentId}/cancel`, {
+  await vercelFetch(`/v13/deployments/${deploymentId}/cancel`, {
     method: 'POST',
   })
 }
@@ -214,7 +227,7 @@ export async function cancelDeployment(deploymentId: string): Promise<void> {
 export async function redeploy(deploymentId: string): Promise<VercelDeployment> {
   const deployment = await getVercelDeployment(deploymentId)
 
-  return vercelFetch<VercelDeployment>(`/${VERCEL_API_VERSION}/v13/deployments`, {
+  return vercelFetch<VercelDeployment>(`/v13/deployments`, {
     method: 'POST',
     body: JSON.stringify({
       project: deployment.project.id,
