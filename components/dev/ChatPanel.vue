@@ -256,11 +256,9 @@ const sendMessage = async () => {
   chatStore.addMessage(projectId, assistantMessage)
 
   try {
-    // 构建消息前缀（包含项目信息）
-    const fullMessage = `项目: ${currentProject.value.name}\n\n${userMessage}`
-
+    // 直接发送用户消息，项目信息由服务端通过 system 消息注入
     await $openclaw.sendMessage(
-      fullMessage,
+      userMessage,
       (delta: string) => {
         // 流式更新最后一条消息
         const session = chatStore.getSession(projectId)
