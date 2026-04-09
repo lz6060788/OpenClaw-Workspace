@@ -8,109 +8,84 @@
       </div>
       <div class="header-actions">
         <el-button
-          variant="ghost"
-          size="sm"
-          icon="refresh-cw"
-          @click="refresh"
-        >
-          刷新
-        </el-button>
-        <el-button
           v-if="docsStore.currentDoc && hasChanges"
-          variant="primary"
-          size="sm"
-          icon="save"
+          type="primary"
+          size="small"
           @click="saveDoc"
         >
           保存
         </el-button>
+        <el-button
+          v-if="docsStore.currentDoc"
+          size="small"
+          text
+          @click="refresh"
+        >
+          刷新
+        </el-button>
       </div>
     </div>
     <div class="editor-body">
+      <!-- 未选择文件 -->
       <div v-if="!docsStore.currentDoc" class="empty-state">
         <Icon name="book-open" size="xl" class="empty-icon" />
         <p>选择左侧文档进行编辑</p>
       </div>
-      <div v-else ref="editorContainer" class="monaco-container"></div>
+
+      <!-- Markdown 编辑器 -->
+      <div v-else class="md-editor-wrap">
+        <MdEditor
+          v-model="editorContent"
+          :preview="true"
+          theme="dark"
+          language="zh-CN"
+          :toolbarsExclude="['github', 'htmlPreview', 'catalog', 'save']"
+          @onSave="saveDoc"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 import { useDocsStore } from '~/stores/docs'
-import * as Icons from '@element-plus/icons-vue'
-
 
 const docsStore = useDocsStore()
-const editorContainer = ref<HTMLElement>()
-const editorInstance = ref<any>(null)
-const content = ref('')
+const editorContent = ref('')
 
 const hasChanges = computed(() => {
-  return content.value !== docsStore.originalContent
-})
-
-const editorOptions = {
-  minimap: { enabled: false },
-  fontSize: 14,
-  lineNumbers: 'on',
-  wordWrap: 'on',
-  scrollBeyondLastLine: false,
-  automaticLayout: true,
-  theme: 'vs-dark',
-}
-
-// 初始化 Monaco Editor
-onMounted(async () => {
-  const monaco = await import('monaco-editor/esm/vs/editor/editor.main')
-  if (editorContainer.value) {
-    editorInstance.value = monaco.editor.create(editorContainer.value, {
-      value: '',
-      language: 'markdown',
-      theme: 'vs-dark',
-      ...editorOptions,
-      automaticLayout: true,
-    })
-  }
+  return editorContent.value !== docsStore.originalContent
 })
 
 // 构建 API URL，附带 agentId
-const buildContentUrl = (doc: string, action: 'content' | 'save') => {
+const buildContentUrl = (doc: string) => {
   const params = new URLSearchParams({ doc })
   if (docsStore.selectedAgent) {
     params.set('agentId', docsStore.selectedAgent)
   }
-  return `/api/docs/${action}?${params.toString()}`
+  return `/api/docs/content?${params.toString()}`
 }
 
-// 监听文档变化
-watch(() => docsStore.currentDoc, async () => {
-  if (!docsStore.currentDoc) {
-    content.value = ''
-    if (editorInstance.value) {
-      editorInstance.value.setValue('')
-    }
-    return
-  }
+// 加载文档内容
+const loadDoc = async () => {
+  if (!docsStore.currentDoc) return
 
   try {
-    const docContent = await $fetch(buildContentUrl(docsStore.currentDoc, 'content')) as string
+    const docContent = await $fetch(buildContentUrl(docsStore.currentDoc)) as string
     if (docContent !== null) {
-      content.value = docContent
       docsStore.setDocContent(docContent)
-      if (editorInstance.value) {
-        editorInstance.value.setValue(docContent)
-      }
+      editorContent.value = docContent
     }
   } catch (e) {
     console.error('Failed to load doc:', e)
-    content.value = '加载失败'
-    if (editorInstance.value) {
-      editorInstance.value.setValue('加载失败')
-    }
+    docsStore.setDocContent('加载失败')
+    editorContent.value = '加载失败'
   }
-})
+}
 
+// 保存文档
 const saveDoc = async () => {
   if (!docsStore.currentDoc) return
 
@@ -119,32 +94,29 @@ const saveDoc = async () => {
       method: 'POST',
       body: {
         doc: docsStore.currentDoc,
-        content: content.value,
+        content: editorContent.value,
         agentId: docsStore.selectedAgent || undefined,
       }
     })
-    docsStore.setDocContent(content.value)
+    docsStore.setDocContent(editorContent.value)
   } catch (e) {
     console.error('Failed to save doc:', e)
   }
 }
 
+// 刷新文档
 const refresh = async () => {
-  if (!docsStore.currentDoc) return
-
-  try {
-    const docContent = await $fetch(buildContentUrl(docsStore.currentDoc, 'content')) as string
-    if (docContent !== null) {
-      content.value = docContent
-      docsStore.setDocContent(docContent)
-      if (editorInstance.value) {
-        editorInstance.value.setValue(docContent)
-      }
-    }
-  } catch (e) {
-    console.error('Failed to refresh doc:', e)
-  }
+  await loadDoc()
 }
+
+// 切换文档时加载新内容
+watch(() => docsStore.currentDoc, (newDoc) => {
+  if (newDoc) {
+    loadDoc()
+  } else {
+    editorContent.value = ''
+  }
+})
 </script>
 
 <style scoped>
@@ -184,6 +156,7 @@ const refresh = async () => {
 .editor-body {
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
 .empty-state {
@@ -200,7 +173,12 @@ const refresh = async () => {
   margin-bottom: var(--spacing-3);
 }
 
-.monaco-container {
+.md-editor-wrap {
   height: 100%;
+}
+
+.md-editor-wrap :deep(.md-editor) {
+  height: 100%;
+  border: none;
 }
 </style>
